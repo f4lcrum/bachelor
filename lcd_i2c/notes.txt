@@ -1,0 +1,8 @@
+https://lastminuteengineers.com/i2c-lcd-arduino-tutorial/
+
+Pins:
+
+GND - Ground pin
+VCC - power supply pin, 5V
+SDA - I2C data pin (A4 Arduino Nano pin)
+SCL - I2C clock pin (A5 Arduino Nano pin)
