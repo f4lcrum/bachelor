@@ -4,5 +4,11 @@ Pins:
 
 GND - Ground pin
 VCC - power supply pin, 5V
-SDA - I2C data pin (A4 Arduino Nano pin)
-SCL - I2C clock pin (A5 Arduino Nano pin)
+SDA - I2C data pin 
+SCL - I2C clock pin 
+I2C1
+      SDA – PB7 or PB9
+      SCL – PB6 or PB8
+I2C2
+      SDA – PB11
+      SCL – PB10
