@@ -1,0 +1,3 @@
+DB0 to DB7 - the data bus pins. These signals can be used to send 8 bits of data from the
+microcontroller to the LCD controller or from the LCD controller to the microcontroller.
+DB7 can be used as busy flag also.
