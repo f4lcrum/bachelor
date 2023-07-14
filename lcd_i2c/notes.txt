@@ -12,3 +12,5 @@ I2C1
 I2C2
       SDA – PB11
       SCL – PB10
+
+A0, A1, A2 - adresy jednotlivych i2c deviceov, kedze su vsetky nastavene na jednicku tak adresa by mala byt 0x3F (Ide o chip PFC8754A)
