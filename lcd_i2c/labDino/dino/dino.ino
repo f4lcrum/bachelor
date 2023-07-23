@@ -51,8 +51,11 @@ void setup()
   lcd.backlight();
   lcd.createChar(0, monster);
   lcd.createChar(1, tree);
+  lcd.setCursor(0,0);
+  lcd.print(" I2C LCD with ");
+  lcd.setCursor(0,1);
   // Init playground 
-  init_terrain();
+  //init_terrain();
 }
 
 
@@ -86,10 +89,11 @@ void play() {
 }
 
 void loop() {
-  byte buttonState = digitalRead(BUTTON);
-  
+  // byte buttonState = digitalRead(BUTTON);
+  lcd.print(" I2C LCD with ");
+  delay(3000);
  
-  play();
+  // play();
 }
 
 
