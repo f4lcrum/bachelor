@@ -1,0 +1,19 @@
+Prerequisities:
+	Install Arduino IDE. I've used 2.10 version.
+	Install drivers: https://www.st.com/en/development-tools/stsw-link009.html#get-software 
+	
+Drivers: after you download drivers, open installation batch file as admin (check included README). After a successful installation, you should see in Device Manager STM32 STLink under "Universal Serial Bus Devices"
+(pic stm32DeviceManager)
+
+Arduino IDE: open IDE and add this link to Additional boards manager URLs: http://dan.drown.org/stm32duino/package_STM32duino_index.json  (pic boards_manager_URLs)
+In version 2.10 of Arduino IDE under "File" you find "Preferences".
+Install boards (pic install_boards) 
+
+When installation process is successful, choose appropriate board: in my case (and yours as well). We will be using STM32F103C6/ Fake STM32F103C8. You can choose another board but this is the option that I've used during development
+Afterwards set "Upload method" to "STLink" (pic STM32SelectBoard)
+
+Afterwards select some example (File -> Examples -> 01 Basic -> Blink) and upload it. Then you should see blinking led on your board
+
+
+
+
