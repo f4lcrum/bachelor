@@ -1,0 +1,16 @@
+https://lastminuteengineers.com/i2c-lcd-arduino-tutorial/
+
+Pins:
+
+GND - Ground pin
+VCC - power supply pin, 5V
+SDA - I2C data pin 
+SCL - I2C clock pin 
+I2C1
+      SDA – PB7 or PB9
+      SCL – PB6 or PB8
+I2C2
+      SDA – PB11
+      SCL – PB10
+
+A0, A1, A2 - adresy jednotlivych i2c deviceov, kedze su vsetky nastavene na jednicku tak adresa by mala byt 0x3F (Ide o chip PFC8754A)
