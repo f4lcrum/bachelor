@@ -43,7 +43,6 @@ void setup() {
   pinMode(BUTTON, INPUT_PULLUP); 
 }
 
-
 void print_number(int num) {
   if (num < 0) {
     num = 0;  
@@ -105,52 +104,10 @@ void cipher_enable(int id) {
   clear_segments();
 }
 
-void write_D1()
-{
-  digitalWrite(D1, HIGH);
-  digitalWrite(D2, LOW);
-  digitalWrite(D3, LOW);
-  digitalWrite(D4, LOW); 
-  clear_segments();
-}
-
-void write_D2()
-{
- 
-  digitalWrite(D1, LOW);
-  digitalWrite(D2, HIGH); 
-  digitalWrite(D3, LOW);
-  digitalWrite(D4, LOW);
-  clear_segments();
-}
-
-void write_D3()
-{
-  digitalWrite(D1, LOW);
-  digitalWrite(D2, LOW);
-  digitalWrite(D3, HIGH); 
-  digitalWrite(D4, LOW);
-  clear_segments();
-}
-
-void write_D4()
-{
-  digitalWrite(D1, LOW);
-  digitalWrite(D2, LOW);
-  digitalWrite(D3, LOW);
-  digitalWrite(D4, HIGH);
-  clear_segments(); 
-}
-
 void print_decimal() // writing the decimal point
 {
   digitalWrite(pinDP, HIGH);
   delay(1);
 }
 
-void segment(const int num){
-  for (int i = 0; i < SEGMENTS; i++) {
-    digitalWrite(pins[i], (numbers[num]>>i)&0x01);
-  } 
-  delay(1);
-}
+
