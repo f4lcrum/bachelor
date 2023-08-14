@@ -1,0 +1,1 @@
+zmen pri uploade boardu na "Generic STM32F103C Board" kvoli flash pamati
