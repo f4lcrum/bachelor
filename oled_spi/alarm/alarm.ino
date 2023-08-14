@@ -1,29 +1,23 @@
 // rotary encoder logic inspired by: https://lastminuteengineers.com/rotary-encoder-arduino-tutorial/
 // Author: Kristian Oravec
-
 #include <Adafruit_SH1106_STM32.h>
 #include <RTClib.h>
 
 #define SPI_PORT   1 // 1:SPI1, 2:SPI2
 // hardware SPI1 (the default case): SDA(MOSI)=PA7,  SCK=PA5
 //          SPI2                   : SDA(MOSI)=PA15, SCK=PA13
-
 // rotary encoder
 #define CLK PA0
 #define DT PC15
 #define SW PC14 // this is push button of encoder 
-
 // oled pins
 #define OLED_DC    PB15
 #define OLED_CS    PB12
 #define OLED_RESET PB14 
-
 // basic push buttons
 #define BUTTON_CONFIRM PA11
-
-//RTC SQW
+//RTC SQW for alarm
 #define CLOCK_INTERRUPT_PIN PB3
-
 
 RTC_DS3231 rtc;
 Adafruit_SH1106 display(OLED_DC, OLED_RESET, OLED_CS, SPI_PORT);
@@ -31,37 +25,32 @@ Adafruit_SH1106 display(OLED_DC, OLED_RESET, OLED_CS, SPI_PORT);
 int currentStateCLK;
 int lastStateCLK;
 int encoder_pos = 0;
-
-int hour_color = WHITE;
-int minute_color = WHITE;
-int second_color = WHITE;
-boolean alarm_set = false;
-char alarm_time[9] = "XX:YY:ZZ";  // this is for time saved for alarm
-
-void setup() {
-    pinMode(BUTTON_CONFIRM, INPUT_PULLUP);
-    init_oled();
-    init_rtc();
-    init_encoder();
-}
-
 int _hours = 0;
 int _minutes = 0;
 int _seconds = 0;
+boolean alarm_set = false;
+char alarm_time[9] = "XX:YY:ZZ";  // this is for time saved for alarm
 
 enum SetMode {
     HOURS,
     MINUTES,
     SECONDS  
 };
-
 SetMode setTimeMode = HOURS;
 
+void setup() {
+    pinMode(BUTTON_CONFIRM, INPUT_PULLUP);
+    init_oled();
+    init_rtc();
+    init_encoder();
+    refresh_display();
+}
+
 void init_oled() {
-  display.begin(SH1106_SWITCHCAPVCC);
-  display.display();
-  delay(2000);
-  display.clearDisplay();
+    display.begin(SH1106_SWITCHCAPVCC);
+    display.display();
+    delay(2000);
+    display.clearDisplay();
 }
 
 void init_encoder() {
@@ -222,6 +211,7 @@ void onAlarm() {
 }
 
 void loop() {
+    // rotary encoder logic is in interrupts
     int btnState = digitalRead(SW);
     int btnConfirmState = digitalRead(BUTTON_CONFIRM);
     if (btnState == LOW) {
