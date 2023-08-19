@@ -1,7 +1,7 @@
 #define LED_PIN PB7  // Replace with your desired LED pin
 
 // Delays in ms
-#define DELAY_UNIT 200
+#define DELAY_UNIT 1000
 #define DELAY_DOT DELAY_UNIT
 #define DELAY_DASH 3*DELAY_UNIT
 #define DELAY_SPACE DELAY_UNIT
@@ -87,7 +87,6 @@ void parse_string(String input){
 
 void loop() {
   String input;
-
   if (Serial.available() > 0) {
     delay(10); // Give some time to byte to arrive in input buffer
     input = Serial.readStringUntil('\n'); 
