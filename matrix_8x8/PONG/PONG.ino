@@ -95,12 +95,12 @@ bool paddle_range(Paddle *p, int x, int y) {
 
 void paddle_move(Paddle *p) {
     for (int y = 0; y < 8; y++) {
-      if (paddle_range(p, p->x_pos, y)) {
-          put_val_playground(p->x_pos, y);
-      }
-      else {
-          del_val_playground(p->x_pos, y);
-      }
+        if (paddle_range(p, p->x_pos, y)) {
+            put_val_playground(p->x_pos, y);
+        }
+        else {
+            del_val_playground(p->x_pos, y);
+        }
     }
 }
 
@@ -150,35 +150,35 @@ void update_p1() {
         if (digitalRead(p1.dt) != p1.currentStateCLK) {
             if (p1.y_pos > PADDLE_MIN) {
                 p1.y_pos--;
-          }
+            }
         }
         else {
-            if (p1.y_pos < PADDLE_MAX){
+            if (p1.y_pos < PADDLE_MAX) {
             p1.y_pos++;
+            }
         }
-      }
     }
     paddle_move(&p1);
     p1.lastStateCLK = p1.currentStateCLK;
 }
 
 void update_p2() {
-  p2.currentStateCLK = digitalRead(p2.clk);
+    p2.currentStateCLK = digitalRead(p2.clk);
 
-  if (p2.currentStateCLK != p2.lastStateCLK && p2.currentStateCLK == 1) {
-      if (digitalRead(p2.dt) != p2.currentStateCLK) {
-        if (p2.y_pos > PADDLE_MIN) {
-          p2.y_pos--;
+    if (p2.currentStateCLK != p2.lastStateCLK && p2.currentStateCLK == 1) {
+        if (digitalRead(p2.dt) != p2.currentStateCLK) {
+            if (p2.y_pos > PADDLE_MIN) {
+                p2.y_pos--;
+            }
         }
-      }
-      else {
-        if (p2.y_pos < PADDLE_MAX){
-            p2.y_pos++;
+        else {
+            if (p2.y_pos < PADDLE_MAX) {
+                p2.y_pos++;
+            }
         }
-      }
-  }
-  paddle_move(&p2);
-  p2.lastStateCLK = p2.currentStateCLK;
+    }
+    paddle_move(&p2);
+    p2.lastStateCLK = p2.currentStateCLK;
 }
 
 void loop() {

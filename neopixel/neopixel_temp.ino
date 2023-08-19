@@ -67,8 +67,7 @@ void console_write_temp(double temp) {
     Serial.println("");
 }
 
-void loop()
-{
+void loop() {
     double temp = sensor.get_temp();
     set_color(temp);
     console_write_temp(temp);

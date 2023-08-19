@@ -17,7 +17,6 @@
 #define pinF PA6
 #define pinG PA1
 #define pinDP PC15 // decimal point
-
 #define BUTTON PB9
 #define DIGITS 4
 #define SEGMENTS 8

@@ -163,7 +163,7 @@ void read_encoder() {
         }
         else {
             if (encoder_pos < upper_bound)
-              encoder_pos++;
+                encoder_pos++;
             }
         }
     lastStateCLK = currentStateCLK;

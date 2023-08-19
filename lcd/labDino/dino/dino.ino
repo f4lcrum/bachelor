@@ -103,7 +103,7 @@ void graphic() {
     score_board();
     for (int i = 0; i <= WIDTH - 2; i++) {
         if (DINO_LOWER_POS && i == 0 && terrain[i + 1] == WHITESPACE) {
-          continue;
+            continue;
         }
         terrain[i] = terrain[i + 1];
     }
@@ -158,7 +158,7 @@ void play() {
             init_game();
         }
         if (terrain[0] == BOMB) {
-          score += 50;
+            score += 50;
         }
         score++;
     }
