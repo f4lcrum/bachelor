@@ -23,19 +23,19 @@
 #define RESTART_DELAY 1000
 
 struct Ball {
-  int x;
-  int y;
-  int x_velocity;
-  int y_velocity;  
+    int x;
+    int y;
+    int x_velocity;
+    int y_velocity;
 };
 
 struct Paddle {
-  int currentStateCLK;
-  int lastStateCLK;
-  int clk;
-  int dt; 
-  int x_pos;
-  int y_pos;
+    int currentStateCLK;
+    int lastStateCLK;
+    int clk;
+    int dt;
+    int x_pos;
+    int y_pos;
 };
 
 
@@ -60,145 +60,145 @@ void init_paddle(Paddle *p, int clk, int dt, int x, int y, UpdateFunctionPointer
 }
 
 void init_ball() {
-  ball.x = 3;
-  ball.y = 4;
-  ball.x_velocity = random(2) ? -1 : 1;
-  ball.y_velocity = random(2) ? -1 : 1;
+    ball.x = 3;
+    ball.y = 4;
+    ball.x_velocity = random(2) ? -1 : 1;
+    ball.y_velocity = random(2) ? -1 : 1;
 }
 
 
 void restart() {
-  init_paddle(&p1, CLK_ROT0, DT_ROT0, 0, 3, update_p1);
-  init_paddle(&p2, CLK_ROT1, DT_ROT1, 7, 4, update_p2);
-  init_ball();
-  clear_playboard();
-  update_p1();
-  update_p2();
+    init_paddle(&p1, CLK_ROT0, DT_ROT0, 0, 3, update_p1);
+    init_paddle(&p2, CLK_ROT1, DT_ROT1, 7, 4, update_p2);
+    init_ball();
+    clear_playboard();
+    update_p1();
+    update_p2();
 }
 
 void setup() {
-  restart();
-  lc.shutdown(0,false);       
-  lc.setIntensity(0,8);      
-  lc.clearDisplay(0);   
+    restart();
+    lc.shutdown(0,false);
+    lc.setIntensity(0,8);
+    lc.clearDisplay(0);
 }
 
 void clear_playboard() {
-  for (int i = 0; i < 8; i++) {
-    playboard[i] = 0;
-  }  
+    for (int i = 0; i < 8; i++) {
+        playboard[i] = 0;
+    }
 }
 
 bool paddle_range(Paddle *p, int x, int y) {
-  return y >= p->y_pos - 1 && y <= p->y_pos + 1 && p->x_pos == x; 
+    return y >= p->y_pos - 1 && y <= p->y_pos + 1 && p->x_pos == x;
 }
 
 void paddle_move(Paddle *p) {
-  for (int y = 0; y < 8; y++) {
-    if (paddle_range(p, p->x_pos, y)) {
-        put_val_playground(p->x_pos, y);   
+    for (int y = 0; y < 8; y++) {
+        if (paddle_range(p, p->x_pos, y)) {
+            put_val_playground(p->x_pos, y);
+        }
+        else {
+            del_val_playground(p->x_pos, y);
+        }
     }
-    else {
-        del_val_playground(p->x_pos, y);
-    }   
-  }
 }
 
 void random_ball_bounce() {
-  int chance = random(3);
-  if (chance == 1) {
-     ball.y_velocity = ball.y_velocity * -1; 
-  } else if (chance == 2) {
-     ball.y_velocity = 0;  
-  }
-  ball.x_velocity = ball.x_velocity * -1;
+    int chance = random(3);
+    if (chance == 1) {
+        ball.y_velocity = ball.y_velocity * -1;
+    } else if (chance == 2) {
+        ball.y_velocity = 0;
+    }
+    ball.x_velocity = ball.x_velocity * -1;
 }
 
 void adjust_score() {
-  ball.x == P1_HOME ? score_p2++ : score_p1++; 
-  delay(RESTART_DELAY);
-  restart();
+    ball.x == P1_HOME ? score_p2++ : score_p1++;
+    delay(RESTART_DELAY);
+    restart();
 }
 
 void update_ball() {
-  if (!(paddle_range(&p1, ball.x, ball.y) || paddle_range(&p2, ball.x, ball.y))) {
-    del_val_playground(ball.x, ball.y);  
-  }
-  ball.x = ball.x + ball.x_velocity;
-  ball.y = ball.y + ball.y_velocity;
-   // check for ball interaction with paddles 
-  if (ball.x == P1_HOME || ball.x == P2_HOME){
-    if (paddle_range(&p1, ball.x, ball.y) || paddle_range(&p2, ball.x, ball.y)){
-      random_ball_bounce();
-    } 
-    else {
-      adjust_score();
+    if (!(paddle_range(&p1, ball.x, ball.y) || paddle_range(&p2, ball.x, ball.y))) {
+        del_val_playground(ball.x, ball.y);
     }
-  }  
-  // bouncing off ceiling
-  if (ball.y == BOTTOM || ball.y == UPPER) {
-      ball.y_velocity = ball.y_velocity * -1;
-  }
-  put_val_playground(ball.x, ball.y);
-  delay(REFRESH_DELAY);
+    ball.x = ball.x + ball.x_velocity;
+    ball.y = ball.y + ball.y_velocity;
+    // check for ball interaction with paddles
+    if (ball.x == P1_HOME || ball.x == P2_HOME){
+        if (paddle_range(&p1, ball.x, ball.y) || paddle_range(&p2, ball.x, ball.y)){
+            random_ball_bounce();
+        }
+        else {
+            adjust_score();
+        }
+    }
+    // bouncing off ceiling
+    if (ball.y == BOTTOM || ball.y == UPPER) {
+        ball.y_velocity = ball.y_velocity * -1;
+    }
+    put_val_playground(ball.x, ball.y);
+    delay(REFRESH_DELAY);
 }
 
 void update_p1() {
-  p1.currentStateCLK = digitalRead(p1.clk);
+    p1.currentStateCLK = digitalRead(p1.clk);
 
-  if (p1.currentStateCLK != p1.lastStateCLK && p1.currentStateCLK == 1) {
-    if (digitalRead(p1.dt) != p1.currentStateCLK) {
-      if (p1.y_pos > PADDLE_MIN) {
-        p1.y_pos--;  
-      }
+    if (p1.currentStateCLK != p1.lastStateCLK && p1.currentStateCLK == 1) {
+        if (digitalRead(p1.dt) != p1.currentStateCLK) {
+            if (p1.y_pos > PADDLE_MIN) {
+                p1.y_pos--;
+            }
+        }
+        else {
+            if (p1.y_pos < PADDLE_MAX) {
+            p1.y_pos++;
+            }
+        }
     }
-    else {
-      if (p1.y_pos < PADDLE_MAX){
-          p1.y_pos++;
-      }
-    }
-  }
-  paddle_move(&p1);
-  p1.lastStateCLK = p1.currentStateCLK;
+    paddle_move(&p1);
+    p1.lastStateCLK = p1.currentStateCLK;
 }
 
 void update_p2() {
-  p2.currentStateCLK = digitalRead(p2.clk);
+    p2.currentStateCLK = digitalRead(p2.clk);
 
-  if (p2.currentStateCLK != p2.lastStateCLK && p2.currentStateCLK == 1) {
-    if (digitalRead(p2.dt) != p2.currentStateCLK) {
-      if (p2.y_pos > PADDLE_MIN) {
-        p2.y_pos--;  
-      }
+    if (p2.currentStateCLK != p2.lastStateCLK && p2.currentStateCLK == 1) {
+        if (digitalRead(p2.dt) != p2.currentStateCLK) {
+            if (p2.y_pos > PADDLE_MIN) {
+                p2.y_pos--;
+            }
+        }
+        else {
+            if (p2.y_pos < PADDLE_MAX) {
+                p2.y_pos++;
+            }
+        }
     }
-    else {
-      if (p2.y_pos < PADDLE_MAX){
-          p2.y_pos++;
-      }
-    }
-  }
-  paddle_move(&p2);
-  p2.lastStateCLK = p2.currentStateCLK;
+    paddle_move(&p2);
+    p2.lastStateCLK = p2.currentStateCLK;
 }
 
 void loop() {
-  update_ball();
-  printByte(playboard);
+    update_ball();
+    printByte(playboard);
 }
 
 void put_val_playground(int x, int y) {
-  playboard[y] |= 1 << x; 
+    playboard[y] |= 1 << x;
 }
 
 void del_val_playground(int x, int y) {
-  playboard[y] &= ~(1 << x); 
+    playboard[y] &= ~(1 << x);
 }
 
 void printByte(byte character [])
 {
-  int i = 0;
-  for(i=0;i<8;i++)
-  {
-    lc.setRow(0,i,character[i]);
-  }
+    int i = 0;
+    for(i=0;i<8;i++)
+    {
+        lc.setRow(0,i,character[i]);
+    }
 }

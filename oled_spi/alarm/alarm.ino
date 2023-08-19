@@ -9,11 +9,11 @@
 // rotary encoder
 #define CLK PA0
 #define DT PC15
-#define SW PC14 // this is push button of encoder 
+#define SW PC14 // this is push button of encoder
 // oled pins
 #define OLED_DC    PB15
 #define OLED_CS    PB12
-#define OLED_RESET PB14 
+#define OLED_RESET PB14
 // basic push buttons
 #define BUTTON_CONFIRM PA11
 //RTC SQW for alarm
@@ -34,7 +34,7 @@ char alarm_time[9] = "XX:YY:ZZ";  // this is for time saved for alarm
 enum SetMode {
     HOURS,
     MINUTES,
-    SECONDS  
+    SECONDS
 };
 SetMode setTimeMode = HOURS;
 
@@ -65,7 +65,7 @@ void init_encoder() {
 void init_rtc() {
     rtc.begin();
     rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-    rtc.disable32K(); 
+    rtc.disable32K();
     pinMode(CLOCK_INTERRUPT_PIN, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(CLOCK_INTERRUPT_PIN), onAlarm, FALLING);
 
@@ -80,18 +80,18 @@ void init_rtc() {
 
     // turn off alarm 2 (in case it isn't off already)
     // again, this isn't done at reboot, so a previously set alarm could easily go overlooked
-    rtc.disableAlarm(2); 
+    rtc.disableAlarm(2);
 }
 
 void print_settings() {
     char* mode;
     if (setTimeMode == HOURS) {
-        mode = " Hours ";    
+        mode = " Hours ";
     } else if (setTimeMode == MINUTES) {
-        mode = "Minutes";  
+        mode = "Minutes";
     } else {
-        mode = "Seconds";  
-    } 
+        mode = "Seconds";
+    }
     display.setTextSize(2);
     display.setTextColor(WHITE);
     display.setCursor(24, 32);
@@ -101,7 +101,7 @@ void print_settings() {
 
 void print_time() {
     char time_str[9] = "XX:YY:ZZ";
-    snprintf(time_str, sizeof(time_str), "%02d:%02d:%02d", _hours, _minutes, _seconds); 
+    snprintf(time_str, sizeof(time_str), "%02d:%02d:%02d", _hours, _minutes, _seconds);
     display.setTextSize(2);
     display.setTextColor(WHITE);
     display.setCursor(18, 14);
@@ -115,7 +115,7 @@ void print_clock_now() {
     display.setTextColor(WHITE);
     display.setCursor(40,54);
     display.println(curr_time);
-    
+
 }
 
 void alarm_menu() {
@@ -124,7 +124,7 @@ void alarm_menu() {
     display.setCursor(0, 0);
     display.print("Alarm: ");
     alarm_set ? display.print(alarm_time) : display.print("NOT SET");
-  
+
     switch (setTimeMode){
         case HOURS:
             _hours = encoder_pos;
@@ -134,7 +134,7 @@ void alarm_menu() {
             break;
         case SECONDS:
             _seconds = encoder_pos;
-            break; 
+            break;
     }
     print_time();
     print_settings();
@@ -148,7 +148,7 @@ void read_encoder() {
     int upper_bound;
     if (setTimeMode == HOURS){
         lower_bound = 0;
-        upper_bound = 23; 
+        upper_bound = 23;
     } else {
         lower_bound = 0;
         upper_bound = 59;
@@ -158,12 +158,12 @@ void read_encoder() {
     if (currentStateCLK != lastStateCLK && currentStateCLK == 1) {
         if (digitalRead(DT) != currentStateCLK) {
             if (encoder_pos > lower_bound){
-                encoder_pos--;  
+                encoder_pos--;
             }
         }
         else {
             if (encoder_pos < upper_bound)
-              encoder_pos++;
+                encoder_pos++;
             }
         }
     lastStateCLK = currentStateCLK;
@@ -173,25 +173,24 @@ void read_encoder() {
 void refresh_display() {
     display.clearDisplay();
     display.display();
-    alarm_menu();       
+    alarm_menu();
 }
 
 void read_button() {
     setTimeMode = static_cast<SetMode>((setTimeMode + 1) % 3);
-    encoder_pos = 0; 
-    refresh_display(); 
+    encoder_pos = 0;
+    refresh_display();
 }
 
 void start_alarm() {
     alarm_set = true;
-    snprintf(alarm_time, sizeof(alarm_time), "%02d:%02d:%02d", _hours, _minutes, _seconds);   
+    snprintf(alarm_time, sizeof(alarm_time), "%02d:%02d:%02d", _hours, _minutes, _seconds);
     refresh_display();
 
     DateTime now = rtc.now();
     DateTime alarmTime = DateTime(now.year(), now.month(), now.day(), _hours, _minutes, _seconds);
     rtc.setAlarm1(alarmTime, DS3231_A1_Date );
 }
-
 
 void onAlarm() {
     int btnState = digitalRead(SW);
@@ -205,7 +204,7 @@ void onAlarm() {
     alarm_set = false;
     while (btnState != LOW) {
         btnState = digitalRead(SW);\
-        delay(50);  
+        delay(50);
     }
     rtc.clearAlarm(1);
 }
@@ -215,11 +214,11 @@ void loop() {
     int btnState = digitalRead(SW);
     int btnConfirmState = digitalRead(BUTTON_CONFIRM);
     if (btnState == LOW) {
-        read_button(); 
-        delay(300);       
+        read_button();
+        delay(300);
     }
     if (btnConfirmState == LOW) {
         start_alarm();
-        delay(50);            
-    }  
+        delay(50);
+    }
 }
