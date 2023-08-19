@@ -3,11 +3,9 @@
 #include <Adafruit_SH1106_STM32.h>
 
 #define OLED_RESET -1
-
 #define POWER_BUTTON PA0
 #define UNITS_CHANGE_BUTTON PA1
 #define SHOW_DATE_BUTTON PA2
-
 #define BUTTON_DELAY 50
 #define CELSIUS "C"
 #define FAHRENHEIT "F"
@@ -15,9 +13,9 @@
 RTC_DS3231 rtc;
 Adafruit_SH1106 display(OLED_RESET);
 Temp_sensor_ds18b20 sensor(PB3);
-
 boolean american = false;
 boolean print_date = true;
+
 void init_oled() {
 	display.begin(SH1106_SWITCHCAPVCC, SH1106_I2C_ADDRESS);  // initialize with the I2C addr 0x3C (for the 128x64)
   	display.display();
@@ -103,7 +101,7 @@ void power_off() {
 	while (true) {
 		int power_button_state = digitalRead(POWER_BUTTON);
 		if (power_button_state == LOW) {
-		break;
+			break;
 		}
 		delay(BUTTON_DELAY);
 	}

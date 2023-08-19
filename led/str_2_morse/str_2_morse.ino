@@ -43,7 +43,6 @@ void blinkChar(char* morse_code)
     }
 }
 
-
 void setup() {
     // Starts serial communication
     Serial.begin(9600);
