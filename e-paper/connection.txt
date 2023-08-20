@@ -2,3 +2,6 @@
 #define DC_PIN          PA3
 #define CS_PIN          PA4
 #define BUSY_PIN        PA1
+
+CLK_PIN PA5
+DIN_PIN PA7
