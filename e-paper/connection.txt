@@ -1,0 +1,4 @@
+#define RST_PIN         PA2
+#define DC_PIN          PA3
+#define CS_PIN          PA4
+#define BUSY_PIN        PA1
