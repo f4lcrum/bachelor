@@ -22,7 +22,7 @@
 #define SEGMENTS 8
 #define TIMER_DURATION 9999 // between 0 and 9999 pls
 
-int dPins[4] = {D1, D2, D3, D4};
+int dPins[4] = {D4, D3, D2, D1};
 int time_point = millis();
 int timer = 0;
 const int clear_seg = 0xff;
@@ -70,7 +70,10 @@ void loop() {
     print_number(timer);
     if ((millis() - time_point) > 1000) {
         time_point = millis();
-        timer--;
+        if (timer > 0) 
+        {
+            timer--;
+        }
     }
 }
 

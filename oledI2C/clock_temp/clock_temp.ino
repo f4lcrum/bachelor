@@ -10,6 +10,7 @@
 #define CELSIUS "C"
 #define FAHRENHEIT "F"
 
+// SCL and SDA pins both of OLED and RTC to PB6 and PB7
 RTC_DS3231 rtc;
 Adafruit_SH1106 display(OLED_RESET);
 Temp_sensor_ds18b20 sensor(PB3);
