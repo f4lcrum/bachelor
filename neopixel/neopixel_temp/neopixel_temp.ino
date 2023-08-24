@@ -16,14 +16,14 @@ typedef struct {
 } TemperatureRange;
 
 TemperatureRange ranges[] = {
-    {17.5,   0,   0, 255},
+    {-198,   0,   0, 255},
     {20,     0, 162, 255},
     {22.5,   0, 255, 154},
     {25,     0, 255,  51},
     {27.5, 255, 230,   0},
     {30,   255, 230,   0},
     {32.5, 255, 128,   0},
-    {9999, 255,   0,   0} // Upper bound placeholder to cover anything above 32.5
+    {40, 255,   0,   0} // Upper bound placeholder to cover anything above 32.5
 };
 
 Temp_sensor_ds18b20 sensor(PB3);

@@ -1,5 +1,0 @@
-White -> RXD
-Grey -> TXD
-Green -> Touch 
-
-// This is just a sensor from doc. Slavicek

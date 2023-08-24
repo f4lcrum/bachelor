@@ -116,6 +116,11 @@ void random_ball_bounce() {
 
 void adjust_score() {
     ball.x == P1_HOME ? score_p2++ : score_p1++;
+    Serial.print("P1 ");
+    Serial.print(score_p1);
+    Serial.print(":");
+    Serial.print(score_p2);
+    Serial.println(" P2");
     delay(RESTART_DELAY);
     restart();
 }

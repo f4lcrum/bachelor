@@ -3,7 +3,7 @@
 // V0 -> GND
 // A -> Backlight Anode
 // K -> Backlight Cathode
-//The RS (data/instruction select) bit tells the LCD whether we are going to send an instruction or a piece of data.
+//The RS (data/instruction select) bit tells the LCD whether we are going to send an instruction or a piece of data. CONNECT TO GND!
 
 // The R/W (read/write) bit tells the LCD whether we wish to read from or to write to RAM.
 // The E (enable) bit tells the LCD when it should read the data lines.
@@ -44,7 +44,6 @@
 #define NIBBLE_MASK 0x0f
 
 #define EN PB10
-#define RW PB4
 #define RS PB11
 #define D0 PB12
 #define D1 PB13
@@ -86,8 +85,6 @@ void send_byte(char data) {
 }
 
 void init_pins() {
-    pinMode(RW, OUTPUT);
-    digitalWrite(RW, LOW); // Set to write mode
     pinMode(RS, OUTPUT);
     pinMode(EN, OUTPUT);
     int pin_count;
@@ -198,15 +195,14 @@ void setup()
     Serial.begin(9600);
     lcd_init(false);
     lcd_home();
-    lcd_put_cur(0,4);
+    lcd_put_cur(0,0);
 
     delay(2000);
 
-    lcd_send_string("IoT je zabava!");
-    lcd_put_cur(1, 14);
+    lcd_send_string("4 bit test");
+    lcd_put_cur(1, 0);
     lcd_send_string("H");
 }
 
 void loop() {
-
 }

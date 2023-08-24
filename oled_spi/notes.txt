@@ -1,0 +1,6 @@
+https://github.com/Tamakichi/Adafruit_SH1106_STM32 for OLED SPI
+RTClib by adafruit (in arduino IDE menu)
+Adafruit GFX (in arduino IDE menu)
+
+When alarm: press rotary encodder button to cancel it
+Push button to confirm clock
