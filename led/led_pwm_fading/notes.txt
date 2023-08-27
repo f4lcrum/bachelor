@@ -1,0 +1,1 @@
+Zalezi od dlzky rezistoru preto ked zapojis potenciometer naopak (lavy kabel do zeme, pravy do 3.3 ) tak aj musis otacat naopak potenciometrom aby sa LED rozziarila
