@@ -1,0 +1,79 @@
+Cieľom druhej laboratórnej práce bude vytvoriť pomocou neopixelu teplomer. Na základe teploty zaznamenanej
+senzorom budeme rozsvietenými LEDkami na neopixelu vyjadrovať výšku teploty. Rozcvičkou sa zoznámime s knižnicou 
+neopixelu a teplomeru DS18B20
+
+Knižnice: https://github.com/FearlessNight/bluepill_ws2812
+          moja knižnica pre teplomer
+Vybavenie: Neopixel, DS18B20 (alebo iné zariadenie merajúce teplotu, musí sa použiť iná knižnica)
+
+Rozcvicka:
+Zadanie a: Rozsvieťte všetky LEDky na neopixelu na zeleno a do Serial monitoru každú sekundu posielajte súčasnú teplotu.
+Chcem aby teploty boli vždy na novom riadku vo formáte: "Temperature: <Insert current temperature> °C" 
+
+Postup: Na začiatok vložíme všetky potrebné knižnice, definujeme makrá a vytvoríme inštancie neopixelu a teplotného senzoru
+```
+#include <bluepill_ws2812.h> 
+#include <temp_sensor_ds18b20.h>
+
+bluepill_neopixel PIX;
+Temp_sensor_ds18b20 sensor(PB3);
+#define NUM_PIXELS 8
+#define string_port GPIOA
+#define string_pin  7
+
+pixel string[NUM_PIXELS];
+```
+Na 4. a 5. riadku definujeme inštancie periférií. Väčšina knižníc je napísaná v C++ a kedže ten pracuje s triedami tak si vlastne tu vytvárame
+inštanciu triedy konkrétnej knižnice nejakého periféria.
+Sú rôzne druhy neopixelov s rôznou dlžkou, tvarom usadenia LED (napr. kruh). Ja som pracoval s Neopixelom ktorý má 8 LED. Spočítajte si počet LED na 
+Vašom neopixelu a podľa toho upravte 
+Toto je jedna z knižníc kde sa definuje oddelene port a pin. Väčšinou sa definuje pin spolu s portom (PA7).
+Posledný riadok definuje reťazec LEDiek kde každej z jednotlivých prvkov poľa vieme nastaviť špecifickú farbu.
+
+Vo funkcii "Setup()" inicializujeme periferium. 
+```
+void setup() {
+    Serial.begin(9600);
+    PIX.begin(string_port, string_pin); // set pin to output 
+    clear_pixels(); 
+}
+```
+2. riadok inicializuje neopixel, berie ako argumenty definovany pin a port kde je pripojený DATA pin.
+3. riadok je vlastná definovaná funkcia. Je dobrým zvykom pri každom displeji spustiť tzv. čistiacu funkciu ktorá 
+vymaže z displeja dáta z predchádzajúceho behu programu. Niekedy je to zbytočný krok kedže niektoré knižnice pri inicializacií tento 
+krok spravia za nás ale v tomto prípade knižnica takúto možnosť nemá.
+
+Priblížime si posledné 3 funkcie ktoré budú nutné na splnenie rozcvičky a následnej laboratórnej práce:
+1. set_pixel(&string[i], 0, 0, 0); - nastaví i.th LEDku na farbu podla RGB. 0, 0, 0 znamená že LED zhasne
+```
+void set_pixel( pixel *p, int r, int g, int b) { // this is intentional (grb)
+    p->rgb.r = g;
+    p->rgb.g = r;
+    p->rgb.b = b;
+}
+```
+Nie je to chyba, knižnica ma v sebe bug kde zelenú časť RGB priradíte do červenej a červenú do zelenej.
+
+2. PIX.paint(string[0].bytes, NUM_PIXELS, string_port, string_pin); - nastaví farby na samotnom neopixelu, ako vstup chce farby prvej ledky, počet pixelov/LED a znova pin a port 
+
+3. double temperature = sensor.get_temp(); - vráti nameranú teplotu zo senzoru.
+
+Vašou úlohou je pomocou nadobudnutých znalostií dokončiť úlohu -  teda dotefinovať clear_pixels() a loop().
+
+
+Laboratorna praca 3: Neopixel thermometer
+
+Zadanie: 
+Na základe teploty zaznamenanej
+senzorom budeme rozsvietenými LEDkami na neopixelu vyjadrovať výšku teploty. Rozcvičkou sa zoznámime s knižnicou 
+neopixelu a teplomeru DS18B20.
+
+Postup: Využite funkcie ktoré ste definovali počas rozcvičky. V podstate jadrom úlohy je si definovať teplotné rozsahy a 
+ku každému rozsahu si priradiť nejakú korenšpondujúcu farbu. Ako pomôcku som použil túto stránku na definíciu farieb v RGB: https://www.rapidtables.com/web/color/RGB_Color.html
+Rozsahy farieb sa dajú kontrolovať rôzne, naivné riešenie je cez sériu if-else. Ak ale chcete aby Váš kód bol kompaktný, rýchly a čitateľný, odporúčam sa zamyslieť nad kľúčovým slovom Struct.
+definoval som si Struct kde som si uložil spodnú hranicu teploty a príslušnú farbu v RGB.
+
+
+meby sem hod fotku ako to svieti
+
+

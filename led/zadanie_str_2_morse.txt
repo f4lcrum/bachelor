@@ -1,0 +1,67 @@
+Cieľom prvej laboratórnej práce bude konverzia znakov na Morseov kod. Ako vystup bude slúžiť LED dioda ktorá bude blikaním
+vyjadrovať jednotlivé znaky morzeovho kódu.
+
+Knižnice: žiadne
+Vybavenie: LED dióda, 220 Ohm rezistor
+
+V tejto prvej laboratórnej práci sa zoznámime so základmi práce s Arduino IDE a to: Serial monitor, posielaním prúdu do jednotlivých
+pinov a prehľadným zapisovaním kódu.
+
+Postup:
+Musíme zistiť do ktorého pinu máme zapojenú LED diódu. Napríklad je to pin PB7. Pre prehľadnosť si definujeme makro pre pin.
+Kód bude tým pádom oveľa viac prehladnejší a modulárnejší. Týmto spôsobom budeme definovať každú konštantu alebo pin.
+```
+#define LED_PIN PB7  // Replace with your desired LED pin
+```
+
+ Otestujeme najskôr či máme led diódu správne zapojenú.
+Kód pre test funkcie LED diódy:
+```
+#define LED_PIN PB7
+
+void setup() {
+    pinMode(LED_PIN, OUTPUT);
+	digitalWrite(LED_PIN, HIGH);
+}
+
+void loop() {
+}
+```
+
+Ak sa nam LEDka rozsvietila, môžeme zacať s prácou.
+
+Začneme s funkciou Setup(). V tejto funkcii len nastavíme Baud rate Serial monitoru na 9600 bauds a začneme sériovú komunikáciu 
+kľúčovým slovom "Serial". Túto procedúru budeme robiť zakaždým keď budeme potrebovať používať Serial monitor v programe.
+```
+void setup() {
+    // Starts serial communication
+    Serial.begin(9600);
+    pinMode(LED_PIN, OUTPUT);
+}
+```
+
+Otázka: Co znamená Baud? A prečo práve 9600
+Odpoveď: Znamená to, že maximálne 9600 krát sa dokáže zmeniť frekvencia serial monitoru za sekundu. Nastaviť sa môže aj na iné číslo.
+Ak by Vás zaujímala bližšia história, poprípade prečo sa používa číslo 9600 tak odporúčam tento link: https://www.sparkfun.com/news/2231
+ZDROJ: https://www.sparkfun.com/news/2231
+
+TO:DO zdroj, viacej opísať
+Ako som spomínal, pre konštanty budeme definovať makra. V našom prípade sa bude hodiť definovať delay - teda koľko ms bude LED dioda svietiť
+pri určitom znaku. Najmenšiu jednotku oneskorenia - nazvime DELAY_UNIT som definoval na 300ms (http://students.cs.ucl.ac.uk/schoolslab/projects/PY2/introduction.html). Kedže Morseovka 
+sa skladá z 2 druhov znakov a to bodka ".", pomlčka "-". Tieto znaky si definujeme taktiež ako makro. Každý z týchto znakov bude svietiť rôzne dlho
+Bodka bude svietiť v našom prípade 300ms, pomlčka 900ms. Pomlčka trvá trojnásobne dlhšie ako bodka. Nemôžme zabudnúť na medzery a tie sú tu 3 druhy: 
+1. Each dot of dash is followed by the blank period which equals to the DELAY_UNIT.
+2. Space between letters is 3 * DELAY_UNIT.
+3. Space between words is 7 * DELAY_UNIT.
+Podľa týchto pravidiel si definujeme zvyšné makrá. Abecedu odporúčam definovať ako globálne pole znakov, kedže sa tým minimalizuje počet riadkov kódu a ku veľkým a malým písmenám
+sa dá elegantne pristupovať. Taktiež globálne pole pre čísla. HINT: Check ASCII table.
+
+
+Vo funkcií "loop()" definujeme reťazec, nazveme ho "input" do ktorého budeme zapisovať vstup zo Serial monitoru.
+Ale ako overíme že nám prišiel nejaký vstup od uživateľa? Jednoducho, Serial objekt obsahuje metódu "available()" ktorá vráti
+nenulové číslo práve vtedy keď uživateľ napíše znak do vstupu Serial monitoru. Jednoduchou podmienkou vieme zistiť či prišiel znak,
+ak áno, dáme 10ms delay. Ten dodávame preto aby sme mali istotu že data dorazili do input bufferu (a 10ms by malo staciť). Do premennej input priradíme volanie 
+funkcie objektu "Serial" a to readStringUntil(terminator). Terminator si určujeme v nastavení Serial monitoru a musí byť rovnaký ako v readStringUntil(). Oddeluje jednotlivé správy ktoré 
+posielate do Serial monitoru. Odporúčam cez Serial.println() zobrazit obsah premennej input aby sme si boli isty ze sprava dorazila v poriadku.
+Navrhujem preklad znakov na LED signály dekomponovať do inej funkcie, ja som si ju nazval "parse_string" ktorá berie na vstupe ako prvý argument samotný vstupný retazec. 
+Výstupom by mali funkčný program, ktorý na základe vstupu v Serial monitore vybliká vetu morzeovkou.

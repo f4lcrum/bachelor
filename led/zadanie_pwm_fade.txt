@@ -1,0 +1,51 @@
+Cieľom druhej laboratórnej práce je pomocou potenciometra meniť jas LED diody.
+
+Knižnice: žiadne
+Vybavenie: LED dióda, 220 Ohm rezistor, rotačný potenciometer
+
+
+V druhej laboratórnej práci sa zoznámime s PWR a analógovymi pinmi prakticky. Nastavovať jas budeme prostredníctvom potenciometra ktorého fungovanie si vysvetlíme. // Link na čast v BP v KAP1: Piny
+
+Potenciometer:
+Je to jednoduchý nástroj s ktorým rotačným alebo lineárnym pohybom variujeme elektrický odpor. Má obrovské spektrum využitia, od nastavovania hlasitosti HI-FI systému až po ovládanie
+veľkej nákladnej lodi  (Zdroj: https://sound-au.com/pots.htm )
+Je veľmi veľa druhov potenciometrov a ich znalosť je nad rámec tejto bakalárskej práce. Sú 2 najzákladnejšie parametre potenciometra:
+
+Odpor: Ide o maximálny odpor ktorý dokážeme nastaviť. Označuje sa často ako 100k W or 100k ω. Prekvapivo sa nestretne často s korektným označením Ω pre jednotku ohms. Dôvod je taký
+že rôzné webstránky, poprípade stamping press nemá k dispozicií in character set symbol Ω. (Zdroj: https://sound-au.com/pots.htm )
+
+Typ: sú rôzne druhy ale najčastejšie sa stretne s 
+  1. Rotačný: otáčaním knobu nastavujeme množstvo napätia.
+  
+  (tvoj obrazok potenciometra ako funguje)
+  2. Trimmer: tento typ väčšinou nie je dostupný bežnému uživateľovi. Je väčšinou pripevnený k circuit, skrytý pred uživateľom v kryte. Na nastavovanie sa používa skrutkovač.
+     Jeho výhodou je veľmi malá cena, nevýhodou je ale že nie je veľmi odolný voči častému používaniu a v priemere vydrží len 100-200 cycles (zdroj: https://www.etechnophiles.com/types-of-potentiometer-applications/ )
+	 Môžeme sa s ním stretnúť na LCD I2C displeji, nastavuje sa ním kontrast displeja.
+  
+  (nejaký obrázok trimmera sem hod)
+
+LED PWM - rozcvička
+Zadanie: Naprogramujte program ktorý umožní pomocou potenciometra meniť jas LED 
+Postup: Zapojte LEDku do PWM pinu (vid kapitola 1.) a potenciometer do Analogoveho pinu. Potenciometer generuje analógový signál a PWM pin ho vie skonvertovať na digitálny.
+Budeme používať ale iné príkazy ako obvykle kedže pracujeme s PWM a analógovymi pinmi:
+1. analogRead(pin) : prečíta analógovú hodnotu z analógového pinu. Funkcia vracia hodnoty medzi <0, 1023> (zdroj: https://www.arduino.cc/reference/en/language/functions/analog-io/analogread/ )
+2. analogWrite(pin, value) : zapíše analógovú hodnotu do PWM pinu. 
+3. map(value, original_low, original_high, map_low, map_high) : funkcia ktorá z hodnoty value ktorá nadobúda hodnoty medzi "original_low" a "original_high" mapuje na hodnoty v rozsahu "map_low" a "map_high".
+   Napríklad číslo 1023 namapuje na hodnotu 255.
+   
+Otázka: Keď zapojím zem a napätie naopak tak musím točiť knob opačným smerom. Prečo?
+Odpoveď: Keď zapojíš potenciometer naopak tak sa zmení aj dĺžka potenciometru: najväčšia rezistencia je zrazu na najľavejšom bode.
+
+
+LED Fading 
+Zadanie: naprogramujte program tak, že LED bude znižovať jas až dokým nezhasne a naopak, zvyšovať jas do plnej intenzity. Nie je potreba potenciometer 
+Postup: celý program bude vo funkcii "loop()" kde budú 2 cykly a číselná premenná ktorá predstavuje analógovú hodnotu. V jednom cykle sa bude inkrementovať a v druhom inkrementovať hodnota ktorá sa bude analógovo zapisovať 
+do LEDky a tým bude vytvárať efekt znižovania a zvyšovania jasu. Pridajte delay s krátkym oneskorením pre lepší efekt.
+
+
+        
+
+
+
+
+

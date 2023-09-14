@@ -1,10 +1,13 @@
+// Inspired by: https://www.arduino.cc/education/morse-code-project/
+// Author: Kristián Oravec
+
 #define LED_PIN PB7  // Replace with your desired LED pin
 
 // Delays in ms
 #define DELAY_UNIT 1000
 #define DELAY_DOT DELAY_UNIT
 #define DELAY_DASH 3*DELAY_UNIT
-#define DELAY_SPACE DELAY_UNIT
+#define DELAY_SPACESAMELETTER DELAY_UNIT
 #define DELAY_SPACELETTER 3 * DELAY_UNIT
 #define DELAY_SPACEWORD 7 * DELAY_UNIT
 
@@ -28,10 +31,10 @@ void blink_led(int delay_ms){
     digitalWrite(LED_PIN, HIGH);
     delay(delay_ms);
     digitalWrite(LED_PIN, LOW);
-    delay(DELAY_SPACE);
+    delay(DELAY_SPACESAMELETTER);
 }
 
-void blinkChar(char* morse_code)
+void parse_morse(char* morse_code)
 {
     for (int i = 0; i < strlen(morse_code); i++){
         if (morse_code[i] == DOT) {
@@ -46,16 +49,7 @@ void blinkChar(char* morse_code)
 void setup() {
     // Starts serial communication
     Serial.begin(9600);
-    while (!Serial) {
-      ; // wait for serial port to connect. Needed for native USB
-    }
-
-    // test LED
     pinMode(LED_PIN, OUTPUT);
-    digitalWrite(LED_PIN, HIGH);
-    delay(1000);
-    digitalWrite(LED_PIN, LOW);
-
 }
 
 void parse_string(String input){
@@ -66,13 +60,13 @@ void parse_string(String input){
           delay(DELAY_SPACEWORD);
       }
       if (isDigit(c)){
-          blinkChar(numbers[c - '0']);
+          parse_morse(numbers[c - '0']);
       }
       else if ( isupper(c)) {
-          blinkChar(letters[c - 'A']);
+          parse_morse(letters[c - 'A']);
       }
       else if (islower(c)) {
-          blinkChar(letters[c - 'a']);
+          parse_morse(letters[c - 'a']);
       }
       else {
           Serial.println("Other characters than alphanumeric are ignored");
@@ -82,10 +76,10 @@ void parse_string(String input){
 }
 
 void loop() {
-    String input;
+    String input; // "Serial.readStringUntil" returns "String" and not "char*"
     if (Serial.available() > 0) {
         delay(10); // Give some time to byte to arrive in input buffer
-        input = Serial.readStringUntil('\n');
+        input = Serial.readStringUntil('\n'); //to-do ako #define delimeter
         Serial.println(input);
         parse_string(input);
     }

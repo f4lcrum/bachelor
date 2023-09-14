@@ -1,0 +1,127 @@
+Cieľom tejto kapitoly bude predstaviť zariadenie STM32F103C8T6 (ďalej len Blue pill), pre ktorý boli napísané aj samotné
+úlohy, predstavenie "Cores" použitých pri úlohach a driverov pre upload a debugging zdrojového kódu.
+Kapitolu uzatvarajú problémy na ktoré som narazil počas vývoja a ich riešenie.
+1.0 Arduino alebo STM32?
+Chápem, pomenovanie spôsobuje chaos. Robíme s Blue pillom osadeným procesorom STM32. Ale zároveň hovorím o Arduine. Poďme si to vysvetliť. Ako istotne viete Arduino je séria vývojových dosiek.
+Každopádne zároveň sa pod "Arduino" chápe aj softvérový ekosystém: teda Arduino IDE a príslúšné rozhranie hardvérových knižníc. Vďaka aktívnej open-source komunite a celkovej rozšírenosti vývojových dosiek
+STM32 vzniklo nespočet implementácií rozhrania Arduino. Oficiálnu podporu podporuje samotné STMicroelectronics.
+Otázka: Prečo ale STM32 platformu používame s Arduino?
+Odpoveď: Arduino som vybral kvôli jeho jednoduchosti používania. Arduino IDE je prosté, lightweight, má širokú podporu periferií a funguje po úvodnej konfiguracií spolahlivo. Je k dispozicií oficiálne IDE od STMicroelectronics (zdroj: https://www.st.com/en/development-tools/stm32cubeide.html)
+ktoré je ale pre naše účely zbytočne ťažkopádne a zložité. 
+Medzi ďalšie výhody patrí nižšia cena a vysší výkon, na obrázku je porovnanie rozmerovo a cenovo totožných modelov z dieľne Arduina a STM32 
+
+(Zdroj na obrázok porovnania arduino nano, bluepill https://www.electronics-lab.com/project/programming-stm32-based-boards-arduino-ide/ )
+Rýchlejší procesor, vyšší výkon, viacej pinov.
+
+Otázka: chcem riešiť úlohy ale nemám rovnaký model vývojovej dosky. Môžem úlohy aj ja robiť?
+Odpoveď: Oficiálny STM core pre Arduino poskytuje podporu pre takmer každý druh vývojovej dosky typu STM32. Bohužiaľ ale niektoré drivery k perifériam spomenuté v mojej práci nemusia 
+fungovať s inými vývojovými doskami STM32.
+ 
+
+1.1 STM32F103C8T6 "Blue pill"
+Jedna z mnoha dosiek osadená MCU (pozn. vysvetliť cez asterisk na spodu stránky alebo očíslovaním) STM32F103C8 je cenovo veľmi dostupný čip s procesorom založený na architektúre
+ARM Cortex-M3 (zdroj: https://stm32-base.org/boards/STM32F103C8T6-Blue-Pill.html ). Je výkonnejšií a lacnejší ako porovnateľne veľké zariadenie Arduino Nano. Komunita STM32 je živá a je
+k dispozícií široka podpora driverov pre rôzne periféria. Nemôžem zabudnúť aj jeho profesionálne využitie pri vývoji vstavaných systémov. Jeho integrácia s Arduino IDE nie je bezproblémová
+a občas sa stane že nájsť vhodný driver pre periférium je nemožné. Vtedy je vhodné sa zamyslieť či nie je jednoduchšie si napísať vlastný driver pre periférium.
+V dalšej kapitole si predstavíme samotnú dosku a jej najdôležitejšiu funkcionalitu
+
+LINK na fotku dosky: https://mischianti.org/2022/05/15/stm32f103c8t6-blue-pill-high-resolution-pinout-and-specs/
+
+Teraz si predstavíme najdôležitejšie informácie ohľadom
+Všetok vstup a výstup je riešený cez tzv. GPIO pin. Nemá špecifickú funkciu. Jeho funkcia sa dá softwarovo preprogramovať.
+
+Opíšeme si bližšie piny ktoré sú najdôležitejšie a stretnete sa s nimi aj pri cvičeniach:
+
+Piny označené tzv. ADC0-9 (PA0-PA7, PB0-1) sú tzv. analógové piny. Majú teda ADC - Analog Digital Convertor a vie rozlíšiť až 2^12 stavov: čo znamená že vie premeniť analógový signál teda vie rozložiť napätie 
+na 4096 diskrétných hodnôt. Napr. 5v / 4096 = 1.22 mV teda najmenší rozlíšitelný analógový krok  je 1.22 mV (zdroj: https://www.electronicshub.org/how-to-use-adc-in-stm32f103c8t6/ )
+
+Piny označené vlnovkou (~) sú tzv. PWM piny (napr. PA0, PA1 ..). Pulse Width Modulation napodobňuje analógový signál tým, že dokáže modifikovať šírku signálu. Bližšie si to vysvetlíme hneď v prvej úlohe.
+
+I2C Piny: SCLX a SDAX (šedé) sú I2C piny - sériový protokol na prenos dát. Defaultne sú použitelné SCL1 - PB6 a SDA1 - PB7.
+Otázka: dokážem zapojiť viacero I2C zariadení do I2C1 ? Ano, I2C podporuje až 127 zariadenií.
+
+Napajácie piny periférnych zariadenií: 5V poskytuje 5V napájanie pre periféria, 3V3 3.3v nápajanie. GND je referenčná úroveň 0V pre vstupné napätie
+
+STLINK V2 piny: Poskytujú rozhranie pre programátor STLINKV2. 3V3 spolu s GND už poznáme, v tomto prípade ale 3v3 pin napája spolu s programátorom celú dosku. Nové piny sú ale SWDIO a SWCLK. Tie slúžia na sériovú
+komunikáciu STLINK V2. Zavádza program do Flash pamäte Blue pillu.
+
+SPI piny: sú k dispozicií 2 SPI rozhrania, SPI 2: PB12-PB15 a SPI 1: PA15, PB3-5 a PA4-PA7. V rámci prác sa stretneme iba s MOSI1 na pine PA7 a SCK1 na PA5. 
+SCK1 pin určuje dohodnutú frekvenciu na základe ktorej Master ktorý v našom prípade je Blue pill posiela dáta na Slave (napr. OLED display s podporou SPI). Do MOSI pinu (Master out(put) slave in(put)) posieľa samotné
+dáta.
+
+PWR led dióda: svieti na červeno pokiaľ je blue pill zapojený do elektriky
+
+PC13 led dióda: Najčastejšie sa s ňou stretnete pri testovaní uploadu programu do pamäte flash, program v pravidelných intervaloch zapína a vypína diódu čo spôsobuje blikanie. Menej často slúži ako indikátor chyby behu programu.
+Napr. pri heap overflow začne ledka rýchlo blikať.
+
+USB: Slúží na debugovanie cez Serial monitor a programovanie dosky. Má obrovskú výhodu v jednoduchosti zapojenia, taktiež poskytuje napájanie pre celý blue pill. Nevýhodou je že Blue pill nepríde s Arduino Ready boot loaderom
+a bude nutné nahrať vhodný bootloader. 
+
+Menej používané piny:
+
+Reset pin: reštartuje Blue pill.
+
+Boot piny: Nastavením Boot pinov dokážeme nastaviť z akého typu pamäte má blue pill bootovať.
+
+
+
+1.2 Cores
+
+Sú to implementácie systémových knižníc pre rozhranie Arduino, sú nevýhnutné na programovanie v Arduino IDE. Počas vývoja som narazil na tieto 2 Cores pre Blue pill:
+
+Arduino_Core_STM32: oficiálny core, podporuje veľmi šírokú škálu vývojových dosiek STM32. Každopádne ho ale veľmi neodporúčam pri práci na cvičeniach kedže nepodporuje upload a debugging cez USB.
+Link: https://github.com/stm32duino/Arduino_Core_STM32
+
+Arduino_STM32: Core ktorý by som odporúčal používať pri riešenií úloh (pokiaľ neupozorním opačne). Jeho nevýhodou je, že nepodporuje až tak širokú škálu STM32 vývojových dosiek ako oficiálny core. Našťastie tu upload a debugging cez USB funguje
+Link: https://github.com/rogerclarkmelbourne/Arduino_STM32
+PS: Nazývaný aj ako Roger Clark core
+
+1.3 Upload
+
+Na upload kódu máte 2 možnosti: USB alebo STLINK V2. Debugovať cez Serial Monitor bohužiaľ vie len USB. Vysvetlíme si postup inštalácie.
+Dôrazne odporúčam najskôr nainštalovať STLINK V2 a pokúsiť sa ním nahrať nejaky example program ktorý poskytuje Arduino IDE. Tým si budeme istý, že Blue pill aj programátor funguje.
+Následne sa môžte pokúsiť o inštaláciu USB podpory.
+
+1.3.1 STLINK V2
+
+Ide o klon pôvodného STLINK V2 od STMicroelectronics. Je možné ním napájať Blue pill 3.3V energie ale problém nastáva pri perifériach ktoré potrebujú viacej energie ako napr. LCD displej.
+LEDkou sveteľne signalizuje stav, červené stále svetlo znamená že komunikuje z počítačom a všetko je v poriadku. Narazil som len na striedanie blikania modrého a červeného svetla a to len
+pri flashovaní bootloaderu. Blue pill poskytuje bohužial len nahratie programu do flash pamäte prostredníctvom STLINK V2, debug nie je možný. 
+
+Driver: https://www.st.com/en/development-tools/stsw-link009.html
+
+1.3.2 USB
+
+Najpohodlnejšia varianta ale zároveň najmenej spolahlivá. Jednoduchým pripojením USB káblu k počítaču dokážete uploadovať data, debugovať a zároveň poskytnete dostatok príkonu pre rozličné periférne zariadenia.
+Jeho inštalácia je trochu dlhšia ako v prípade STLINK V2. Predpokladám že s programátorom STLINK V2 ste sa zoznámili, nainštalovali ste Roger Clark Core a vyskúšali ste nahrať example code z Arduino IDE. Bohužiaľ návod priložený v dokumentácií neprišiel najvhodnejšií 
+a prikladám teda odskúšaný návod.
+
+1. krok: stiahnite si príslušný bootloader ku vývojovej doske, v našom prípade generic_bsoot_20_pc13.bin https://github.com/rogerclarkmelbourne/STM32duino-bootloader/tree/master/binaries
+2. krok: je nutné flashnut blue pill pomocou STLINK V2 a STM32CubeProg, link: https://www.st.com/en/development-tools/stm32cubeprog.html 
+3. krok: nastavte BOOT0 jumper na 1 a BOOT1 jumper na 0. Týmto nastavíme bootovanie z System Memory. Zároveň nám to dovolí flashnuť bootloader (zdroj: https://www.electrosoftcloud.com/en/stm32f103-bootloader-and-programming/ )
+4. krok: Pripojte STLINK V2 ku BluePillu a PC, otvorte si bin súbor generic_boot20_pc13.bin. Konfigurácia ST-LINK by zhruba mala odpovedať. Ujistite sa, že začiatočná address is 0x08000000, size 0x400 and Data width 32-bit. Sú to defaultné hodnoty.
+5. krok: Stlačte Download
+6. krok: po úspešnom stiahnutií odpojte BluePill, nastavte BOOT0 jumper na 0 teda na default mode - bootuje z User flash (https://www.electrosoftcloud.com/en/stm32f103-bootloader-and-programming/)
+7. krok: pripojte USB k BluePillu a k PC. V Windows Device Manager by sa Vám malo objaviť nové USB Serial Device pod Ports (COM  & LPT) 
+
+
+1.4 Najčastejšie chyby
+
+1. Couldn't find the DFU device: [1EAF:0003] : skontroluj či si správne pri flashovani nastavil BOOT jumpery. Pri niektorých kópiach som sa stretol že BOOT jumpery majú naopak. Skúste znova flash bootloader
+2. PC13 LEDka freneticky bliká: mohlo dôjsť k pádu programu. V tomto prípade mi nepomohol reset ale len cez Full chip erase cez STM32CubeProgrammer a znova flash bootloader
+
+hod sem obrazok toho FULL CHIP ERASE
+
+
+
+
+
+
+
+ 
+
+
+ 
+
+
+

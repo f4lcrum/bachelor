@@ -1,0 +1,113 @@
+The aim of this chapter will be to present the STM32F103C8T6 device (hereinafter referred to as BluePill), for which the
+tasks, presentation of "Cores" used in tasks and drivers for uploading and debugging source code.
+The chapter closes with the problems I encountered during development and their solutions.
+1.0 Arduino or STM32?
+I get it, naming causes chaos. We work with Bluepill equipped with an STM32 processor. But at the same time I'm talking about Arduino. Let's explain it. As you probably know, Arduino is a series of development boards.
+Anyway, at the same time, "Arduino" also means the software ecosystem, i.e. the Arduino IDE and the corresponding hardware library interface. Thanks to the active open-source community and the overall prevalence of development boards
+STM32 has spawned countless Arduino interface implementations. Official support is supported by STMicroelectronics itself.
+Question: But why do we use the STM32 platform with Arduino?
+Answer: I chose Arduino because of its ease of use. Arduino IDE is simple, lightweight, has wide support for peripherals and works reliably after the initial configuration. An official STMicroelectronics IDE is available (source: https://www.st.com/en/development-tools/stm32cubeide.html)
+which is unnecessarily cumbersome and complex for our purposes.
+Other advantages include a lower price and higher performance, the picture shows a comparison of the same size and price models from Arduino and STM32
+
+(Source for arduino nano comparison image, bluepill https://www.electronics-lab.com/project/programming-stm32-based-boards-arduino-ide/ )
+Faster processor, more power, more pins.
+
+Question: I want to solve tasks but I don't have the same model of development board. Can I do the assignments too?
+Answer: The official STM core for Arduino provides support for almost every kind of STM32 type development board. Unfortunately, some peripheral drivers mentioned in my work do not have to
+work with other STM32 development boards.
+ 
+
+1.1 STM32F103C8T6 "Blue pill"
+One of the many boards equipped with an MCU (note explain via asterisk at the bottom of the page or by numbering) STM32F103C8 is a very affordable chip with a processor based on the architecture
+ARM Cortex-M3 (source: https://stm32-base.org/boards/STM32F103C8T6-Blue-Pill.html ). I cannot forget its professional use in the development of embedded systems. Its integration with the Arduino IDE is not without problems
+and sometimes it happens that finding a suitable driver for a peripheral is impossible. Then it is appropriate to think about whether it is easier to write your own driver for the peripheral.
+In the next chapter, we will introduce the board itself and its most important functionality
+
+LINK to the photo of the board: https://mischianti.org/2022/05/15/stm32f103c8t6-blue-pill-high-resolution-pinout-and-specs/
+
+Now we will introduce the most important information regarding
+All input and output is handled through the so-called GPIO pin. It has no specific function. Its function can be reprogrammed by software.
+
+We will describe in more detail the pins that are the most important and you will also encounter them during the exercises:
+
+Pins marked with so-called ADC0-9 (PA0-PA7, PB0-1) are so-called analog pins. So they have an ADC - Analog Digital Converter and can distinguish up to 2^12 states: which means that it can convert an analog signal, i.e. it can distribute the voltage
+to 4096 discrete values. For example 5v / 4096 = 1.22 mV, so the smallest distinguishable analog step is 1.22 mV (source: https://www.electronicshub.org/how-to-use-adc-in-stm32f103c8t6/ )
+
+Pins marked with a tilde (~) are so-called PWM pins (eg PA0, PA1 ..). Pulse Width Modulation mimics an analog signal by being able to modify the width of the signal. We will explain it in more detail in the very first task.
+
+I2C Pins: SCLX and SDAX (grey) are I2C pins - serial data transfer protocol. SCL1 - PB6 and SDA1 - PB7 are usable by default.
+Question: can I connect multiple I2C devices to I2C1? Yes, I2C supports up to 127 devices.
+
+Peripheral pin power supplies: 5V provides 5V power for peripherals, 3V3 3.3v power. GND is the 0V reference level for the input voltage
+
+STLINK V2 pins: Provides an interface for the STLINKV2 programmer. We already know 3V3 together with GND, but in this case, the 3v3 pin powers the entire board together with the programmer. But the new pins are SWDIO and SWCLK. They are used for serial
+STLINK V2 communication. Loads the program into the Flash memory of the Blue pill.
+
+SPI pins: 2 SPI interfaces are available, SPI 2: PB12-PB15 and SPI 1: PA15, PB3-5 and PA4-PA7. As part of the work, we will only encounter MOSI1 on pin PA7 and SCK1 on PA5.
+SCK1 pin determines the agreed frequency based on which the Master, which in our case is the Blue pill, sends data to the Slave (e.g. OLED display with SPI support). It sends itself to the MOSI pin (Master out(put) slave in(put)).
+data.
+
+PWR led diode: lights up red when the blue pill is connected to the electricity
+
+PC13 led diode: You will most often encounter it when testing the upload of a program to flash memory, the program switches the diode on and off at regular intervals, which causes flashing. 
+Less commonly this serves as a run-time error indicator.
+For example in case of heap overflow, the LED starts flashing quickly.
+
+USB: Used for debugging via Serial monitor and board programming. It has a huge advantage in the ease of connection, it also provides power for the entire blue pill. The disadvantage is that the Blue pill does not come with an Arduino Ready boot loader
+and it will be necessary to upload a suitable bootloader.
+
+Less used pins:
+
+Reset pin: restarts the Blue pill.
+
+Boot pins: By setting the Boot pins, we can set what type of memory the blue pill should boot from.
+
+
+
+1.2 Cores
+
+They are implementations of the system libraries for the Arduino interface, they are necessary for programming in the Arduino IDE. During development I came across these 2 Cores for Blue pill:
+
+Arduino_Core_STM32: official core, supports a very wide range of STM32 development boards. In any case, I do not recommend it when working on exercises, as it does not support uploading and debugging via USB.
+Link: https://github.com/stm32duino/Arduino_Core_STM32
+
+Arduino_STM32: Core that I would recommend to use when solving tasks (unless I warn you otherwise). Its disadvantage is that it does not support such a wide range of STM32 development boards as the official core. Fortunately, uploading and debugging via USB works here
+Link: https://github.com/rogerclarkmelbourne/Arduino_STM32
+PS: Also called Roger Clark core
+
+1.3 Upload
+
+You have 2 options for uploading the code: USB or STLINK V2. Unfortunately, only USB can debug via Serial Monitor. We will explain the installation procedure.
+I strongly recommend to first install STLINK V2 and try to use it to upload some example program provided by Arduino IDE. This will make sure that both the Blue pill and the programmer work.
+You can then try to install USB support.
+
+1.3.1 STLINK V2
+
+It is a clone of the original STLINK V2 from STMicroelectronics. It is possible to power the Blue pill with 3.3V energy, but the problem arises with peripherals that need more energy, such as e.g. LCD display.
+The LED light signals the status, a steady red light means that it is communicating with the computer and everything is fine. I only came across an alternation of flashing blue and red light and that's all
+while flashing the bootloader. Blue pill unfortunately only provides program uploading to flash memory via STLINK V2, debugging is not possible.
+
+Driver: https://www.st.com/en/development-tools/stsw-link009.html
+
+1.3.2 USB
+
+The most convenient option, but also the least reliable. By simply connecting a USB cable to a computer, you can upload data, debug, and at the same time provide enough power for various peripheral devices.
+Its installation is a bit longer than STLINK V2. I assume that you have familiarized yourself with the STLINK V2 programmer, installed Roger Clark Core and tried uploading the example code from the Arduino IDE. Unfortunately, the instructions included in the documentation were not the most suitable
+and I am attaching a tried-and-tested guide.
+
+Step 1: download the appropriate bootloader to the development board, in our case generic_boot_20_pc13.bin https://github.com/rogerclarkmelbourne/STM32duino-bootloader/tree/master/binaries
+2nd step: it is necessary to flash the blue pill using STLINK V2 and STM32CubeProg, link: https://www.st.com/en/development-tools/stm32cubeprog.html
+3rd step: set BOOT0 jumper to 1 and BOOT1 jumper to 0. This will set booting from System Memory. At the same time, it allows us to flash the bootloader (source: https://www.electrosoftcloud.com/en/stm32f103-bootloader-and-programming/ )
+Step 4: Connect STLINK V2 to BluePill and PC, open the bin file generic_boot20_pc13.bin. The ST-LINK configuration should roughly match. Make sure that the starting address is 0x08000000, size 0x400 and Data width 32-bit. These are the default values.
+Step 5: Press Download
+6th step: after successful download, disconnect BluePill, set BOOT0 jumper to 0, i.e. to default mode - it boots from User flash (https://www.electrosoftcloud.com/en/stm32f103-bootloader-and-programming/)
+Step 7: connect the USB to the BluePill and to the PC. You should see a new USB Serial Device under Ports (COM & LPT) in Windows Device Manager
+
+
+1.4 The most frequent errors
+
+1. Couldn't find the DFU device: [1EAF:0003] : check if you set the BOOT jumpers correctly during flashing. With some copies, I have come across that the BOOT jumpers have the other way around. Try flashing the bootloader again
+2. PC13 LED flashes frantically: the program may have crashed. In this case, the reset did not help me, but only through Full chip erase through STM32CubeProgrammer and flash bootloader again
+
+throw here a picture of the FULL CHIP ERASE
