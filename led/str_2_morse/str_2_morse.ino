@@ -10,6 +10,7 @@
 #define DELAY_SPACESAMELETTER DELAY_UNIT
 #define DELAY_SPACELETTER 3 * DELAY_UNIT
 #define DELAY_SPACEWORD 7 * DELAY_UNIT
+#define TERMINATOR '\n'
 
 #define DOT '.'
 #define DASH '-'
@@ -79,7 +80,7 @@ void loop() {
     String input; // "Serial.readStringUntil" returns "String" and not "char*"
     if (Serial.available() > 0) {
         delay(10); // Give some time to byte to arrive in input buffer
-        input = Serial.readStringUntil('\n'); //to-do ako #define delimeter
+        input = Serial.readStringUntil(TERMINATOR); //to-do ako #define delimeter
         Serial.println(input);
         parse_string(input);
     }

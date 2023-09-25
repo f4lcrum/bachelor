@@ -1,0 +1,44 @@
+The goal of the second laboratory work is to use a potentiometer to change the brightness of the LED.
+
+Libraries: none
+Equipment: LED diode, 220 Ohm resistor, rotary potentiometer
+
+
+In the second laboratory work, we will get to know PWR and analog pins practically. We will adjust the brightness using a potentiometer, the operation of which we will explain. // Link to part in BP in KAP1: Pins
+
+Potentiometer:
+It is a simple tool with which we vary the electrical resistance by rotary or linear movement. It has a huge range of uses, from adjusting the volume of the HI-FI system to control
+of a large cargo ship (Source: https://sound-au.com/pots.htm )
+There are many types of potentiometers and their knowledge is beyond the scope of this bachelor's thesis. There are 2 most basic potentiometer parameters:
+
+Resistance: This is the maximum resistance that we can set. It is often referred to as for example 100k W or 100k ω. Surprisingly, one does not often come across the correct designation Ω for the unit ohms. The reason is this
+that various websites, or the stamping press does not have the in character set symbol Ω available. (Source: https://sound-au.com/pots.htm )
+
+Type: there are different types, but the most common is met with
+   1. Rotary: we set the amount of tension by turning the knob.
+  
+   (your picture of the potentiometer how it works)
+   2. Trimmer: this type is usually not available to the average user. It is usually attached to the circuit board, hidden from the user in the cover. A screwdriver is used for adjustment.
+      Its advantage is a very low price, but the disadvantage is that it is not very resistant to frequent use and lasts only 100-200 cycles on average (source: https://www.etechnophiles.com/types-of-potentiometer-applications/ )
+We can meet it on the LCD I2C display, it sets the contrast of the display.
+  
+   (some picture of the trimmer thrown here)
+
+LED PWM - warm-up
+Assignment: Program a program that allows you to change the brightness of the LED using a potentiometer
+Approach: Connect the LED to the PWM pin (see chapter 1.) and the potentiometer to the Analog pin. The potentiometer generates an analog signal, and the PWM pin can convert it to a digital one.
+But we will use different commands than usual since we are working with PWM and analog pins:
+1. analogRead(pin) : reads an analog value from an analog pin. The function returns values between <0, 1023> (source: https://www.arduino.cc/reference/en/language/functions/analog-io/analogread/ )
+2. analogWrite(pin, value) : writes the analog value to the PWM pin.
+3. map(value, original_low, original_high, map_low, map_high) : the function which maps the values between "original_low" and "original_high" to values in the range "map_low" and "map_high".
+    For example, the number 1023 maps to the value 255.
+The resulting program is extremely trivial so with previously mentioned commands you should be able to create program without significant problems.
+
+Question: When I connect the ground and the voltage vice versa, I have to turn the knob in the opposite direction. Why?
+Answer: When you connect the potentiometer the other way around, the length of the potentiometer changes as well: the greatest resistance is suddenly at the leftmost point.
+
+
+LED Fading
+Instruction: program the program so that the LED will decrease the brightness until it goes out and vice versa, increase the brightness to full intensity. There is no need for a potentiometer
+Procedure: the entire program will be in the "loop()" function, where there will be 2 cycles and a numerical variable that represents an analog value. In one cycle, the value that will be written analogically will be incremented and in the second incremented
+into the LED and thus it will create the effect of decreasing and increasing the brightness. Add a delay with a short delay for a better effect.

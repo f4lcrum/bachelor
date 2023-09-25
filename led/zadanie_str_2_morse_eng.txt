@@ -1,0 +1,81 @@
+In this first laboratory work, we will get to know the basics of working with the Arduino IDE, namely: Serial monitor, delays, sending current to individual
+pins and clearly writing the code.
+
+Libraries: none
+Equipment: LED diode, 220 Ohm resistor
+
+Approach: We need to find out which pin we have the LED connected to. For example, it is pin PB7. For clarity, we define a macro for a pin.
+The code will therefore be much cooler and more modular. This way we will define each constant or pin.
+```
+#define LED_PIN PB7 // Replace with your desired LED pin
+```
+
+  We will first test whether we have the led diode connected correctly.
+Code for LED function test:
+```
+#define LED_PIN PB7
+
+void setup() {
+     // put your setup code here, to run once: 
+     pinMode(LED_PIN, OUTPUT);
+     digitalWrite(LED_PIN, HIGH);
+}
+
+void loop() {
+     // put your main code here, to run repeatedly:	
+}
+```
+
+If the LED lights up, we can start working.
+
+Warm-up:
+Write a program that detects the LED every second, lets it light up for 1s and then turns it off again for 1s. At the same time, write the message to the serial monitor "Every 2 seconds a new line in Serial monitor will arrive!" a
+write any input you write to the Serial monitor back to the serial monitor in the format: "My input: <your input>".
+Approach:
+As with the program that tested the LED connection, we also define a macro for the pin. But we will create another macro for the terminator. I will explain its meaning later, for now just create it and define it as '\n'.
+Let's start with the Setup() function. In this function, we just set the Baud rate of the Serial monitor to 9600 bauds and start serial communication
+keyword "Serial". We will do this procedure every time we need to use the Serial monitor in the program.
+```
+void setup() {
+      // Starts serial communication
+      Serial.begin(9600);
+      pinMode(LED_PIN, OUTPUT);
+}
+```
+pinMode(pin, mode):   function accepts pin and mod as input. The vast majority of the time we encounter 2 mods:
+OUTPUT: the peripheral on the PIN serves as an output, in this case the LED presents the output: you send a signal and it lights up
+INPUT: a peripheral on a pin serves as an input, for example a button, presents an input.
+
+Q: What does Baud mean? And why 9600?
+Answer: It means that the frequency of the serial monitor can be changed a maximum of 9600 times per second. It can also be set to another number.
+If you are interested in a closer history, or why the number 9600 is used, I recommend this link: https://www.sparkfun.com/news/2231
+SOURCE: https://www.sparkfun.com/news/2231
+Key features to solve the task:
+
+Serial.println(data) : prints data to the serial monitor and puts a delimiter at the end of the line - that is, moves the header to a new line.
+Serial.print(data) : same but without delimeter.
+Serial.available() : finds out whether the input from the user has arrived on the serial monitor, if so, the return value is non-zero, if not, it is zero. It is often used together with the Serial.readStringUntil command
+Serial.readStringUntil(delimeter): reads letters from the serial buffer into a String. He reads until he hits the terminator. (source: https://www.arduino.cc/reference/en/language/functions/communication/serial/readstringuntil/ ).
+delay(num): pauses the program for num milliseconds.
+digitalWrite(PIN, HIGH): writes the digital value "1" to the pin, there is also LOW which symbolizes "0"
+
+The resulting code is very short, in short we just find out if there is any input from the user, if so we put a 10ms delay to be sure that the data will arrive from the input buffer.
+Then we read the data from the serial monitor and write it back to the serial monitor. Apart from that, we just leave the LED on for 1s and leave it off for 1s.
+
+
+Laboratory task: String to Morse code
+Assignment: The first laboratory work's goal will be converting characters into Morse code. The output will be a flashing LED
+express the individual characters of Morse code.
+Approach:
+As I mentioned, we will define macros for constants. In our case, it will be useful to define a delay - that is, how many ms will the LED light up
+at a certain character. I defined the smallest delay unit - let's call it DELAY_UNIT - at 300ms (http://students.cs.ucl.ac.uk/schoolslab/projects/PY2/introduction.html). Because Morse code
+consists of 2 types of characters, i.e. dot ".", dash "-". We also define these characters as macro. Each of these signs will be lit for a different amount of time
+In our case, the dot will light for 300ms, the dash for 900ms. A dash takes three times as long as a period. We can't forget about spaces, and there are three types of them:
+1. Each dot of the dash is followed by the blank period which equals the DELAY_UNIT.
+2. Space between letters is 3 * DELAY_UNIT.
+3. Space between words is 7 * DELAY_UNIT.
+We define the remaining macros according to these rules. I recommend defining the alphabet as a global character array, as this minimizes the number of lines of code and the case
+can be approached elegantly. Also, it is a global field for numbers. HINT: Check the ASCII table.
+
+The core of the program will take place in the loop() function where we will find out if any input from the Serial monitor has run out. After that, you have to go through the entire entry and translate each letter into Morse code and signal accordingly.
+You have all the standard features in C/C++ and you shouldn't need anything extra.

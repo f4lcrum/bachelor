@@ -126,6 +126,8 @@ void adjust_score() {
 }
 
 void update_ball() {
+	// vymazuje lopticku z displeja aby nedochadzalo k "Sandevistan" efektu, checkuje sa ale to aby neodsekol z
+	// obidvoch rakiet
     if (!(paddle_range(&p1, ball.x, ball.y) || paddle_range(&p2, ball.x, ball.y))) {
         del_val_playground(ball.x, ball.y);
     }
@@ -147,7 +149,7 @@ void update_ball() {
     put_val_playground(ball.x, ball.y);
     delay(REFRESH_DELAY);
 }
-
+// interrupt function 
 void update_p1() {
     p1.currentStateCLK = digitalRead(p1.clk);
 
@@ -159,14 +161,14 @@ void update_p1() {
         }
         else {
             if (p1.y_pos < PADDLE_MAX) {
-            p1.y_pos++;
+				p1.y_pos++;
             }
         }
     }
     paddle_move(&p1);
     p1.lastStateCLK = p1.currentStateCLK;
 }
-
+// interrupt function 
 void update_p2() {
     p2.currentStateCLK = digitalRead(p2.clk);
 

@@ -1,0 +1,77 @@
+The goal of the second laboratory work will be to create a thermometer using a neopixel. Based on the temperature recorded
+with the sensor we will express the height of the temperature with lighted LEDs on the neopixel. We will get to know the library as a warm-up
+neopixel and DS18B20 thermometer
+
+Libraries: https://github.com/FearlessNight/bluepill_ws2812
+           my thermometer library
+Equipment: Neopixel, DS18B20 (or other temperature measuring device, another library must be used)
+
+Warm-up:
+Input a: Light all the LEDs on the neopixel to green and send the current temperature to the Serial monitor every second.
+I want the temperatures to always be on a new line in the format: "Temperature: <Insert current temperature> °C"
+
+Procedure: At the beginning, we insert all necessary libraries, define macros and create instances of neopixel and temperature sensor
+```
+#include <bluepill_ws2812.h>
+#include <temp_sensor_ds18b20.h>
+
+bluepill_neopixel PIX;
+Temp_sensor_ds18b20 sensor(PB3);
+#define NUM_PIXELS 8
+#define string_port GPIOA
+#define string_pin 7
+
+pixel string[NUM_PIXELS];
+```
+On the 4th and 5th lines, we define instances of peripherals. Most of the libraries are written in C++, and since it works with classes, we actually create them here
+an instance of a class of a specific library of some peripheral.
+There are different types of neopixels with different lengths, shapes of LED placement (e.g. circle). I worked with Neopixel, which has 8 LEDs. Count the number of LEDs per
+to your neopixel and adjust accordingly
+This is one of the libraries where port and pin are defined separately. Usually a pin is defined together with a port (PA7).
+The last line defines a chain of LEDs where we can set a specific color for each of the individual elements of the field.
+
+We initialize the peripheral in the "Setup()" function.
+```
+void setup() {
+     Serial.begin(9600);
+     PIX.begin(string_port, string_pin); // set pin to output
+     clear_pixels();
+}
+```
+The 2nd line initializes the neopixel, taking as arguments the defined pin and the port where the DATA pin is connected.
+The 3rd line is a custom defined function. It is a good practice to run the so-called cleaning function which
+erases the data from the previous program run from the display. Sometimes this is an unnecessary step because some libraries do this during initialization
+they will do the step for us, but in this case the library does not have such an option. The implementation is up to you.
+
+Let's take a closer look at the last 3 functions that will be necessary to complete the warm-up and subsequent laboratory work:
+1. set_pixel(&string[i], 0, 0, 0); - sets the i.th LED to RGB color. 0, 0, 0 means the LED will turn off
+```
+void set_pixel( pixel *p, int r, int g, int b) { // this is intentional (grb)
+     p->rgb.r = g;
+     p->rgb.g = r;
+     p->rgb.b = b;
+}
+```
+It's not a mistake, the library has a bug where you assign the green part of RGB to red and red to green.
+
+2. PIX.paint(string[0].bytes, NUM_PIXELS, string_port, string_pin); - sets the colors on the neopixel itself, as the input wants the colors of the first led, the number of pixels/LEDs and again the pin and port
+
+3. double temperature = sensor.get_temp(); - returns the measured temperature from the sensor.
+
+Your task is to use the acquired knowledge to complete the task - that is, to define clear_pixels() and loop().
+
+
+Laboratory work 3: Neopixel thermometer
+
+Assignment:
+Based on the temperature recorded
+with the sensor we will express the height of the temperature with lighted LEDs on the neopixel. We will get to know the library as a warm-up
+neopixel and DS18B20 thermometer.
+
+Procedure: Use the functions you defined during the warm-up. Basically, the core of the task is to define the temperature ranges and
+assign a corresponding color to each range. As a guide, I used this page to define colors in RGB: https://www.rapidtables.com/web/color/RGB_Color.html
+Color ranges can be controlled in different ways, a naive solution is through a series of if-else. But if you want your code to be compact, fast and readable, I recommend thinking about the Struct keyword.
+I defined a Struct where I saved the lower temperature limit and the corresponding color in RGB.
+
+
+I would like to post a photo of how it lights up
