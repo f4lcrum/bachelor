@@ -37,8 +37,9 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "fonts.h"
+#include <avr/pgmspace.h>
 
-const uint8_t Font24_Table [] = 
+const uint8_t Font24_Table [] PROGMEM = 
 {
 	// @0 ' ' (17 pixels wide)
 	0x00, 0x00, 0x00, //                  

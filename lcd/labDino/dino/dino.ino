@@ -165,7 +165,7 @@ void play() {
 
 void loop() {
     int buttonState = digitalRead(BUTTON);
-    if (buttonState == HIGH) {
+    if (buttonState == LOW) {
         DINO_LOWER_POS = false;
     } else {
         DINO_LOWER_POS = true;

@@ -20,6 +20,14 @@ void clear_screen() {
     tft.setTextColor(WHITE);        
 }
 
+void print_command(char * cmd_name, char * description) {
+    tft.setTextSize(2);
+    tft.setTextColor(YELLOW);
+    tft.print(cmd_name);
+    tft.setTextColor(WHITE);
+    tft.println(description);    
+}
+
 void setup(void) {
     delay(1000);
     Serial.begin(115200);
@@ -58,15 +66,6 @@ void setup(void) {
     commands();
 }
 
-void print_command(char * cmd_name, char * description) {
-    tft.setTextSize(2);
-    tft.setTextColor(YELLOW);
-    tft.print(cmd_name);
-    tft.setTextColor(WHITE);
-    tft.println(description);    
-}
-
-
 void commands() {
     clear_screen();
     tft.setCursor(40, 0);
@@ -76,10 +75,7 @@ void commands() {
     tft.println();
 
     print_command("INSTRUCTIONS: ", "Write a command as Serial monitor input.");
-    print_command("\'identify\':", "Verifies if your fingerprint is in database");
-    print_command("\'commands\': ", "Show this commands list");
     print_command("\'enroll\': ", "Enroll a new fingerprint");
-    print_command("\'erase\': ", "Erase database of fingerprints");
 }
 
 uint8_t readnumber(void) {
@@ -112,129 +108,7 @@ void enroll_fingerprint() {
     delay(2000);       
 }
 
-void identify() {
-    clear_screen();
-    tft.setCursor(0, 0);
-    tft.setTextSize(1.5);
-    tft.println("Put finger on scanner. To return to menu, type \'menu\' to Serial monitor input");
-    tft.println();
-    tft.println();
-    tft.setTextSize(1);
-    int id = -1; // implicitly it sets up to 0 
-    while (true) {
-        id = get_ID();
-        if (Serial.available() > 0) break; // new input in serial monitor
-        delay(50);       
-    }
-}
-
-void loop() {
-    String input;
-    if (Serial.available() > 0) {
-        delay(10); 
-        input = Serial.readStringUntil('\n'); 
-        parse_cmd(input);   
-    }
-}
-
-void parse_cmd(String cmd) {
-    if (cmd == "identify") {
-       identify();
-    } else if (cmd == "enroll") {
-        enroll_fingerprint();
-    } else if (cmd == "commands") {
-       commands();        
-    } else if (cmd == "erase") {
-        erase();
-    } else {
-        commands();
-        Serial.println("Invalid command, reroute to \'commands\'");    
-    }
-
-}
-
-void erase() {
-    clear_screen();
-    tft.setCursor(40, 0); tft.setTextSize(3);
-    tft.println("Erase");  
-    tft.setTextSize(2);
-    tft.println("Erasing in progress");
-    finger.emptyDatabase();
-    delay(500);
-    tft.println("Erased!");
-    delay(500);   
-    commands(); // return to commands menu 
-}
-
-// returns -1 if failed, otherwise returns ID #
-int get_ID() {
-    uint8_t p = finger.getImage();
-    switch (p) {
-        case FINGERPRINT_OK:
-            Serial.println("Image taken");
-            break;
-        case FINGERPRINT_NOFINGER:
-            Serial.println("No finger detected");
-            return p;
-        case FINGERPRINT_PACKETRECIEVEERR:
-            Serial.println("Communication error");
-            return p;
-        case FINGERPRINT_IMAGEFAIL:
-            Serial.println("Imaging error");
-            return p;
-        default:
-            Serial.println("Unknown error");
-            return p;
-    }
-
-      // OK success!
-    
-    p = finger.image2Tz();
-    switch (p) {
-        case FINGERPRINT_OK:
-            Serial.println("Image converted");
-            break;
-        case FINGERPRINT_IMAGEMESS:
-            Serial.println("Image too messy");
-            return p;
-        case FINGERPRINT_PACKETRECIEVEERR:
-            Serial.println("Communication error");
-            return p;
-        case FINGERPRINT_FEATUREFAIL:
-            Serial.println("Could not find fingerprint features");
-            return p;
-        case FINGERPRINT_INVALIDIMAGE:
-            Serial.println("Could not find fingerprint features");
-            return p;
-        default:
-            Serial.println("Unknown error");
-            return p;
-      }
-    
-      // OK converted!
-      p = finger.fingerSearch();
-      if (p == FINGERPRINT_OK) {
-          Serial.println("Found a print match!");
-      } else if (p == FINGERPRINT_PACKETRECIEVEERR) {
-          Serial.println("Communication error");
-          return p;
-      } else if (p == FINGERPRINT_NOTFOUND) {
-          tft.setTextColor(RED);
-          tft.println("Did not find a match");
-          return p;
-      } else {
-          Serial.println("Unknown error");
-          return p;
-      }
-    tft.setTextColor(GREEN);
-    // found a match!
-    tft.print("Found ID #"); tft.print(finger.fingerID); 
-    tft.print(" with confidence of "); tft.println(finger.confidence);
-    return p;
-}
-
 uint8_t getFingerprintEnroll() {
-
     int p = -1;
     tft.print("Waiting for valid finger to enroll as #"); tft.println(enroll_id);
     while (p != FINGERPRINT_OK) {
@@ -371,4 +245,22 @@ uint8_t getFingerprintEnroll() {
         return p;
     }
   return true;
+}
+void parse_cmd(String cmd) {
+    if (cmd == "enroll") {
+        enroll_fingerprint();
+    
+    } else {
+        commands();
+        Serial.println("Invalid command, reroute to \'commands\'");    
+    }
+}
+
+void loop() {
+   String input;
+    if (Serial.available() > 0) {
+        delay(10); 
+        input = Serial.readStringUntil('\n'); 
+        parse_cmd(input);   
+    }
 }
