@@ -2,7 +2,7 @@
  *  @filename   :   imagedata.h
  *  @brief      :   head file for imagedata.cpp
  *
- *  Copyright (C) Waveshare     August 7 2017
+ *  Copyright (C) Waveshare     September 5 2017
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documnetation files (the "Software"), to deal
@@ -23,9 +23,8 @@
  * THE SOFTWARE.
  */
 
-extern const unsigned char IMAGE_BLACK[];
-extern const unsigned char IMAGE_RED[];
-extern const unsigned char mojsej [];
+extern const unsigned char IMAGE_DATA[];
+
 /* FILE END */
 
 

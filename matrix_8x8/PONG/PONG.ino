@@ -78,8 +78,8 @@ void restart() {
 
 void setup() {
     restart();
-    lc.shutdown(0,false);
-    lc.setIntensity(0,8);
+    lc.shutdown(0,false); //0.ty device zapne teda tvoj jediny matrix
+    lc.setIntensity(0,8); 
     lc.clearDisplay(0);
 }
 
