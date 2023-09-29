@@ -13,14 +13,11 @@
 #define BUTTON PB9
 #define DIGITS 4
 #define SEGMENTS 8
-#define TIMER_DURATION 9999 // between 0 and 9999 pls
 
 int dPins[DIGITS] = {D4, D3, D2, D1};
-int time_point = millis();
-int timer = 0;
-const int clear_seg = 0xff;
 const int pins[SEGMENTS] = {pinA, pinB, pinC, pinD, pinE, pinF, pinG, pinDP};
 const int numbers[10] = {0xc0, 0xf9, 0xa4, 0xb0, 0x99, 0x92, 0x82, 0xf8, 0x80, 0x90};
+int count = 0;
 int last_state = LOW;
 int current_state;
 
@@ -33,8 +30,7 @@ void setup() {
     pinMode(D2, OUTPUT);
     pinMode(D3, OUTPUT);
     pinMode(D4, OUTPUT);
-    set_timer();
-    pinMode(BUTTON, INPUT_PULLUP);
+    pinMode(BUTTON, INPUT_PULLUP);  
 }
 
 void print_number(int num) {
@@ -57,38 +53,6 @@ void print_number(int num) {
     num = num % 1;
 }
 
-void loop() {
-    current_state = digitalRead(BUTTON);
-    if (last_state == LOW && current_state == HIGH) {
-        set_timer();
-    }
-    print_number(timer);
-    if ((millis() - time_point) > 1000) {
-        time_point = millis();
-        if (timer > 0) 
-        {
-            timer--;
-        }
-    }
-    last_state = current_state;
-}
-
-void print_num(int id, unsigned char num)
-{
-    cipher_enable(id);
-    for (int i = 0; i < SEGMENTS; i++) {
-        digitalWrite(pins[i], (numbers[num]>>i)&0x01);
-    }
-    delay(5);
-}
-
-void set_timer() {
-    if (0 > TIMER_DURATION  || TIMER_DURATION > 9999) {
-        return;
-    }
-    timer = TIMER_DURATION;
-}
-
 void clear_segments() {
     for (int i = 0; i < SEGMENTS; i++) {
         digitalWrite(pins[i], HIGH);
@@ -101,8 +65,20 @@ void cipher_enable(int id) {
     clear_segments();
 }
 
-void print_decimal() // writing the decimal point
+void print_num(int id, unsigned char num)
 {
-    digitalWrite(pinDP, HIGH);
-    delay(1);
+    cipher_enable(id);
+    for (int i = 0; i < SEGMENTS; i++) {
+        digitalWrite(pins[i], (numbers[num]>>i)&0x01);
+    }
+    delay(5);
+}
+
+void loop() {
+    current_state = digitalRead(BUTTON);
+    if (last_state == LOW && current_state == HIGH) {
+        count++; // button is released
+    }
+    print_number(count);
+    last_state = current_state;
 }
