@@ -5,10 +5,14 @@
 #define CACTUS 1
 #define BOMB 2
 #define WIDTH 16
+#define BUTTON PB11
 
+int button_state;
+int last_button_state = LOW;
 int score = 0;
+unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
+unsigned long debounceDelay = 50;    // the debounce time; increase if the output flickers
 bool DINO_LOWER_POS = true; // initial position, if false he is on upper floor
-const byte BUTTON = PB11;
 // First parameter is address of I2C bus slave, all 3 addresses (A0, A1, A2) were set to 1. Explanation: I2C have 7-bit address, the first four bits of PFC8754A are "0111", the lower 3 bits (A0, A1, A2) are set to 1, so the whole address is "0111111" in binary, 0x3F in he   x
 // PB6 SCL, PB7 SDA
 LiquidCrystal_I2C lcd(0x27, 16, 2); // adresy jednotlivych i2c deviceov, kedze su vsetky nastavene na jednicku tak adresa by mala byt 0x3F (Ide o chip PFC8754A)
@@ -122,7 +126,7 @@ void game_over() {
     lcd.setCursor(0, 1);
     lcd.print("Click to start!");
     int buttonState = digitalRead(BUTTON);
-    while (buttonState == HIGH) {
+    while (buttonState == LOW) {
         buttonState = digitalRead(BUTTON);
     };
 }
@@ -165,7 +169,7 @@ void play() {
 
 void loop() {
     int buttonState = digitalRead(BUTTON);
-    if (buttonState == LOW) {
+    if (buttonState == HIGH) {
         DINO_LOWER_POS = false;
     } else {
         DINO_LOWER_POS = true;
