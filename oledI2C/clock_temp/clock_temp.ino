@@ -9,13 +9,21 @@
 #define BUTTON_DELAY 50
 #define CELSIUS "C"
 #define FAHRENHEIT "F"
+#define TEMP_SENSOR_PIN PB3
 
 // SCL and SDA pins both of OLED and RTC to PB6 and PB7
 RTC_DS3231 rtc;
 Adafruit_SH1106 display(OLED_RESET);
-Temp_sensor_ds18b20 sensor(PB3);
+Temp_sensor_ds18b20 sensor(TEMP_SENSOR_PIN);
 boolean american = false;
 boolean print_date = true;
+// all buttons states
+int last_state_datebutton = LOW;
+int curr_state_datebutton;
+int last_state_unitsbutton = LOW;
+int curr_state_unitsbutton;
+int last_state_pwrbutton = LOW;
+int curr_state_pwrbutton;
 
 void init_oled() {
 	display.begin(SH1106_SWITCHCAPVCC, SH1106_I2C_ADDRESS);  // initialize with the I2C addr 0x3C (for the 128x64)
@@ -102,32 +110,40 @@ void power_off() {
 	while (true) {
 		int power_button_state = digitalRead(POWER_BUTTON);
 		if (power_button_state == LOW) {
+            Serial.println("Turning on");
 			break;
 		}
 		delay(BUTTON_DELAY);
 	}
 }
 
-void loop() {
-	int power_button_state = digitalRead(POWER_BUTTON);
-	int units_button_state = digitalRead(UNITS_CHANGE_BUTTON);
-	int show_date_button_state = digitalRead(SHOW_DATE_BUTTON);
+void buttons_logic() {
+    int power_button_state = digitalRead(POWER_BUTTON);
+    int units_button_state = digitalRead(UNITS_CHANGE_BUTTON);
+    int show_date_button_state = digitalRead(SHOW_DATE_BUTTON);
 
-	if (power_button_state == LOW) {
-		power_off();
-	}
-	if (units_button_state == LOW) {
-		american = ! american;
-	}
-	if (show_date_button_state == LOW) {
-		print_date = ! print_date;
-	}
-	if (print_date) {
-		show_date();
-	}
-	else {
-		american ? show_temp(fahrenheit(sensor.get_temp()), FAHRENHEIT) : show_temp(sensor.get_temp(), CELSIUS);
-	}
+    if (last_state_pwrbutton == LOW && power_button_state == HIGH) {
+        power_off();
+    }
+    if (last_state_unitsbutton == LOW && units_button_state == HIGH) {
+        american = ! american;
+    }
+    if (last_state_datebutton == LOW && show_date_button_state == HIGH) {
+        print_date = ! print_date;
+    }
+    if (print_date) {
+        show_date();
+    }
+    else {
+        american ? show_temp(fahrenheit(sensor.get_temp()), FAHRENHEIT) : show_temp(sensor.get_temp(), CELSIUS);
+    }
+    last_state_pwrbutton = power_button_state;
+    last_state_unitsbutton = units_button_state;
+    last_state_datebutton = show_date_button_state;
+}
+
+void loop() {
+	buttons_logic();
 	show_time();
 	display.display();
 	display.clearDisplay();;
