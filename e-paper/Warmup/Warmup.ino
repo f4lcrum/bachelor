@@ -26,16 +26,18 @@ void setup()
     paint.SetHeight(200);
 
     paint.Clear(COLORED);
+    paint.Clear(UNCOLORED);
 }
 
 void loop()
 {
     if(Serial1.available() > 0)      
     {
+        paint.Clear(COLORED);
+        paint.Clear(UNCOLORED);
         input = Serial1.readStringUntil(TERMINATOR);        
-        paint.DrawStringAt(0, y, input.c_str(), &Font16, COLORED);
-        epd.SetFrameMemory(paint.GetImage(), 0, 10, paint.GetWidth(), paint.GetHeight());
+        paint.DrawStringAt(0, y, input.c_str(), &Font16, COLORED); // ak biele pozadie tak colored inak uncolored 
+        epd.SetFrameMemory(paint.GetImage(), 0, 0, paint.GetWidth(), paint.GetHeight()); // 0, 0 znamena co vsetko updatnut (teda vsetko v tomto pripade)
         epd.DisplayPartFrame();
-        y += 16;
    }
 }

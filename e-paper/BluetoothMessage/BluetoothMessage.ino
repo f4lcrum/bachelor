@@ -24,7 +24,7 @@ void setup()
 
     paint.SetWidth(200);
     paint.SetHeight(200);
-
+    paint.Clear(UNCOLORED); 
     paint.Clear(COLORED);
 }
 
@@ -32,9 +32,14 @@ void loop()
 {
     if(Serial1.available() > 0)      
     {
+        if (y + 16 >= paint.GetWidth()) {
+            Serial1.println("No space, clearing");
+            paint.Clear(COLORED);
+            paint.Clear(UNCOLORED);        
+        }
         input = Serial1.readStringUntil(TERMINATOR);        
-        paint.DrawStringAt(0, y, input.c_str(), &Font16, COLORED);
-        epd.SetFrameMemory(paint.GetImage(), 0, 10, paint.GetWidth(), paint.GetHeight());
+        paint.DrawStringAt(0, y, input.c_str(), &Font16, UNCOLORED);
+        epd.SetFrameMemory(paint.GetImage(), 0, 0, paint.GetWidth(), paint.GetHeight());
         epd.DisplayPartFrame();
         y += 16;
    }
