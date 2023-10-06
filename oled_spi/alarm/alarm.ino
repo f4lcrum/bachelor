@@ -21,7 +21,8 @@
 
 RTC_DS3231 rtc;
 Adafruit_SH1106 display(OLED_DC, OLED_RESET, OLED_CS, SPI_PORT);
-
+int last_SW_state = LOW;
+int last_btn_confirm_state = LOW;
 int currentStateCLK;
 int lastStateCLK;
 int encoder_pos = 0;
@@ -39,6 +40,7 @@ enum SetMode {
 SetMode setTimeMode = HOURS;
 
 void setup() {
+    Serial.begin(9600);
     pinMode(BUTTON_CONFIRM, INPUT_PULLUP);
     init_oled();
     init_rtc();
@@ -203,22 +205,30 @@ void onAlarm() {
     display.display();
     alarm_set = false;
     while (btnState != LOW) {
-        btnState = digitalRead(SW);\
+        btnState = digitalRead(SW);
         delay(50);
     }
     rtc.clearAlarm(1);
 }
 
-void loop() {
+void button_logic() {
     // rotary encoder logic is in interrupts
     int btnState = digitalRead(SW);
     int btnConfirmState = digitalRead(BUTTON_CONFIRM);
-    if (btnState == LOW) {
+    if (last_SW_state == LOW && btnState == HIGH) {
         read_button();
         delay(300);
     }
-    if (btnConfirmState == LOW) {
+    if (last_btn_confirm_state == LOW && btnConfirmState == HIGH) {
         start_alarm();
         delay(50);
     }
+    last_SW_state = btnState;
+    last_btn_confirm_state = btnConfirmState;     
+}
+
+void loop() {
+    button_logic();
+    Serial.println("Loop");
+    delay(100);
 }

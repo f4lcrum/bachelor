@@ -1,0 +1,2 @@
+Ked nevies aky port tak si otvor obidva v putty a v .ino file hod nejaky pravidelny serial.print (do loopu idealne s nejakym 1s delayom).
+Tak zistis ze ktory COM port treba pouzit
