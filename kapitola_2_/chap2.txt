@@ -1,0 +1,101 @@
+Obsah tejto kapitoly tvorí prehľad zobrazovacích zariadenií použítých pri práci na laboratórnych úlohach. Na začiatok si predstavíme pojem "electronic display" a následne pokračujeme podrobnejším popisom zobrazovacích zariadenií
+použítých v laboratórnych úlohách. Kapitolu zakončíme metódami komunikácie Bluepillu s jednotlivými zobrazovacími zariadeniami.
+
+
+2.2 Display devices
+
+LED - 
+
+Ide o polovodičovú elektronickú súčiastku ktorá vyžaruje svetlo ked ňou prechádza elektrický prúd. Pinout je veľmi jednoduchý a skladá sa dvoch pinov: dlhší pin je anóda do ktorej putuje kľadné napätie a kratší pin je Katoda ktorý je
+pripojený do zeme. Pre prácu s Bluepillom a LED diódou bude nutné predpojiť aj rezistor. Na web stránke u výrobcu väčšinou narazíte aj na popis kde bližšie popisuje koľko Ohmový rezistor treba pre rôzne druhy napätia. V prípade nedostatočne silného
+rezistora hrozí výrazne skrátenie životnosti LED diódy, dokonca aj zničenie samotnej diódy. Je to z dôvodu že Bluepill pracuje s 3.3V a LED dióda je konštrukčne prispôsobená na maximálne 1,79V (Zdroj:  https://dratek.cz/arduino/1031-led-dioda-cervena-5mm.html )
+
+NEOPIXEL WS2812
+
+Ide o Intelligent control LED integrated light source. Súčasťou každej LEDky je RGB čip ktorý umožňuje nastaviť farebnú kombináciu ktorá zostane uložená uložená aj po odpojení elektrickej energie.
+Nastaviť sa dá až 256 úrovní jasu, 16777216 farieb. Umožňuje aj kaskádový režim, kde sa sériovo za sebou pošlú 24 bitové dátove balíčky. Napríklad máme tri ledky, pošleme 72 bitov. Prvá LED si zoberie 24 bitov, nastaví farbu a pošle zvyšok správy do dalšej LED diódy, tá si zoberie 
+dalších 24 bitov, nastaví farbu a pošle zvyšok dalej. 3. LEDka má posledných 24 bitov a opakuje činnosť predchádzajúcich LEDiek.
+
+ZDROJ: https://cdn-shop.adafruit.com/datasheets/WS2812B.pdf
+Hod sem obrazok z datasheetu Data transmission method
+
+ 
+
+LED 7 SEGMENTOVÝ DISPLEJ
+
+7 Segmentový displej používa na rozžiarenie 7 LED segmentov. Jednotlivé cifry zobrazujeme rozžiarením určitých segmentov tak, aby pripomínali čísla. 
+
+(fotka pinoutu)
+
+
+Pinout D1-D4 posieľajú prúd do jednotlivých cifier. Teda na zobrazenie napríklad čísla tri na druhej cifre je nutné turn on pin D2 a následne je možné rozsvietiť príslušné segmenty tak,
+aby pripomínali číslo dva
+
+Bohužiaľ môžete sa stretnúť s tým že displeje od iného výrobcu majú D1-D4 piny uložené naopak. Taktiež veľkým zdrojom chýb je či daný displej používa spoločnú anódu alebo spoločnú katódu.
+V prípade spoločnej anódy treba uzemniť  pin aby sa segment alebo cifra rozsvietila. Naopak v prípade spoločnej katódy.
+
+
+LED MATRIX MAX 7219
+
+Ide o modul LED matice s LED Display Driver MAX 7219. Ten umožňuje perzistentne uložiť stav až 64 LEDiek. Samotný čip poskytuje rozličné množstvo rozhranií pre komunikáciu a to teda SPI, QSPI
+a MICROWIRE. Umožňuje zapojiť viacero modulov do kaskády. Spotreba veľmi záleží od množstva rozsvietených LED diód, samotný čip  umožňuje aj Low-power Shutdown ktorý zachová dáta pri minimalnom odbere 
+elektriny. Pri ovládaní 7 segmentových displejov umožňuje MAX7219 radič dekódovanie BCD. V tom prípade stačia len 4 bity namiesto ôsmich pre zobrazenie znakov 0-9, E, H,
+L, P, and -) 
+
+
+LCD 16X2 
+
+Ide o LCD displej schopný pojať 16 znakov na dvoch riadkoch. Je ovládaný Hitachi HD44780 LCD controller alebo jeho klonom. Výraba sa v rozličných variantách, napríklad už zmieňovaný
+16x2 alebo 20x4. Obsahuje ROM pamäť schopná pojať až 240 znakov: Z toho 208 veľkosti 5x8 a 32 veľkosti 5x10 (zdroj: 1 strana hitachi datasheet). Taktiež obsahuje Character generator o veľkosti 
+64 bajtov a je schopný pojať 8 custom znakov o veľkosti 5x8. Problémom je že ide o volatile pamäť a tým pádom po vypnutí displeja custom znaky nezostanu uložené. 
+Najčastejšia forma komunikácie s Bluepill je cez paralelné rozhranie alebo cez rozhranie I2C. 
+
+Hod sem fotku I2C a Paralelnej
+
+Nezabudnite pri I2C variante skrutkovačom nastaviť kontrast. 
+V prípade varianty I2C je nutné nájsť príslušnú adresu. Stretol som sa iba s 2 I2C adresami, adresu nájdete jednoducho podľa názvu čipu na I2C prevodníku alebo softwarovo.
+Paralelná varianta obsahuje veľké množstvo pinov. Je ale možné dáta posieľať v 4-bitovom móde namiesto 8-bitovom a tým sa zbaviť 4 káblov. Všetky známe knižnice tento režim podporujú.
+
+
+OLED 0.96 SH1106
+
+Ide o malý displej používajúci technológiu OLED - tenký organický film medzi anódou a katódou. OLED narozdiel od LCD nepotrebuje podsvietenie a poskytuje nízku spotrebu, rýchlu odozvu 
+a široký pozorovací uhol.  (zdroj: https://techfun.sk/produkt/oled-0-96-display-128x64/?attribute_pa_pocet-pinov=4-piny&currency=EUR&gclid=Cj0KCQjwpompBhDZARIsAFD_Fp9x7Z5SQla6yzcrFiXmCfSruYRh3qq9b9sY6rj5JGUbiX3MJpH5RBYaAt1dEALw_wcB0 
+V tejto veľkosti majú rozlíšenie 132x64 a driverom bývajú väčšinou dva druhy: bud SH1106 alebo SSD1306. Na obidva displeje sú drivere, dokonca aj Adafruit GFX knižnica ktorá poskytuje základné 
+grafické primitíva - body, číary, kruhy.. na budovanie grafikých rozhranií.  (zdroj: https://github.com/adafruit/Adafruit-GFX-Library ) 
+
+Bluepill dokáže s OLED displejmi komunikovať dvoma spôsobmi: a to buď cez SPI a I2C. Pre bežného uživateľa na tom v podstate nezáleží, I2C používa štyri káble zato SPI sedem.
+ (zdroj: https://cdn.velleman.eu/downloads/29/infosheets/sh1106_datasheet.pdf ) 
+ 
+ 
+Open-Smart 2.4" 320x240 TFT Touchscreen SPFD5408
+
+Lacný, veľký a farebný TFT displej s podporou dotýkové ovládania. Natívne funguje takmer bez problémov s Arduino Uno alebo Mega. Súčasťou dosky je slot na SD kartu. Ten slúži
+ako potencionálne úložisko pre rôzne bitmapové obrázky. Na doske nájdeme aj teplomer LM75 ktorý komunikuje cez I2C. Súčasťou balenia je aj stylus. Aplikácie displeja nezaberajú 
+veľké množtvo pamäte pretože grafické operácie a vlastnú pamäť má driver displeja ktorých je veľké množstvo druhov. Ja som pracoval s SPFD5408. Neexistuje veľa knižníc kompatibilných
+s Bluepillom preto odporúčam používať s Arduino Uno/Mega alebo zvoliť displej s iným driverom 
+
+(zdroj: https://www.laskakit.cz/open-smart-320x240-barevny-lcd-tft-displej-2-4-shield-arduino/ )
+
+Waveshare 1.54" 200x200 ePaper
+
+E-Ink je tzv. elektroforetický displej. Ide o displej ktorý obsahuje biele částice v mikro kapsliach rozptýlench v tenkej vrstve tmavého viskózného roztoku. Privedením krátkeho impulzu
+sa tieto biele čáastice pohnú, prípade natočia smerom ku prednej strane displeja, čo spôsobí že sa daný pixel javí ako biely, privedením impulzu opačnej polarity zas ako čierny.
+Vysoká viskozita roztoku spôsobuje že zmeny zostavajú aj po odpojení od elektriky. Treba ale po dlhšej dobe znovu vyčistiť obrazovku aby zmeny nezostali navždy.
+Zdroj: https://www.waveshare.com/wiki/1.54inch_e-Paper_Module_Manual#Introduction
+
+Tento model komunikuje s Bluepillom cez 3 alebo 4 pinový SPI. Poskytuje rozlišenie 200x200.
+Tu náražame na problém pamäťovej náročnosti kedže samotný displej si neukladá žiadne dáta: všetky bitmapové dáta musia byť uložené na Bluepill resp. inej vývojovej doske.
+Pri 3-farebných variantách displeja tento problém je ešte viac akútny lebo je potreba si pamätať bitmapu aj pre tretiu farbu. A to pri rozlíšenií 200x200 nie je schopná zvládnuť 
+akákoľvek doska. Preto odporúčam používať STM32 dosky poprípade výkonne Arduino Mega. Knižnice sú k dispozícií oficiálne od výrobcu Waveshare.
+
+
+ 
+
+
+
+
+
+
+
+

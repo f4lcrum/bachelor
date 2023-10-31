@@ -1,0 +1,82 @@
+Zobrazovacie zariadenia v IoT
+
+Takmer kazde zariadenie v pocitacovom priemysle pouziva nejakú formu zobrazovania dát na výstup - či sú to LEDky ktoré indikujú 
+prácu disku alebo niekoľko metrové reklamné displeje. IoT segment nie je v tomto rozdielny: poskytuje veľmi široké spektrum zobrazovacích
+zariadenií ktoré sú defacto dnes už používajú bežne: od LED cez 7-segmentový displej až po technologicky najpokročilejšie OLED displeje.
+
+Používať budeme počas vývoja platformu Arduino a vývojovú dosku STM32F103C8T6 Blue Pill (footnote rozober co to znamena). V podkapitole 1.1 predstavujem v 
+kratkosti platformy Arduino a STM32, v podkapitole 1.2 kritiku laboratórnych prác dostupných na internete a predstavím v krátkosti moje 
+laboratórne práce. (nezabudni na linky na podkapitoly)
+Vysvetliť
+
+
+Podkapitola 1.1 - Arduino alebo STM32?
+
+Ako som spomenul vyššie - Arduino je ekosystém ktorý ponúka softwarovú podporu - teda hlavne Arduino IDE (integrované vývojové prostredie), knižnice a drivery
+na prácu s perifériami MCU a samozrejme aj samotné vývojové dosky, napríklad Arduino UNO alebo Arduino MEGA. Vďaka veľkej a aktívnej open-source komunite a ceľkovo výraznej 
+popularite vývojových dosiek platformy STM32 vzniklo veľké množstvo implementácií Arduino softwarového rozhrania na širokú paletu vývojových dosiek STM32. 
+
+1.1.1 Výhody a nevýhody platformy STM32
+Signifikantnou výhodou STM32 platformy je ich výkon a nízka cena. Existuje veľké množstvo vývojových dosiek s procesorom STM32 - od čínských lacných klonov až po profesionálne varianty. Pri vývojových doskách od Arduina je cena vyššia - čo sa síce dá riešiť nákupom klonu ale procesor býva výrazne pomalší ako cenový ekvivalent z dieľne STM32. Nezanedbateľnú rolu hrá aj veľkosť samotných dosiek, spravidla 
+čím menšia doska, tým lepšie, kedže vstavané zariadenia nemajú väčšinou k dispozícií veľký priestor (kamery, tlačiarne, routery).
+
+<* Obrázok porovnáva cenovo a veľkostne rovnaké modely od Arduina a STM32 (UNO vs Blue Pill) *>
+
+Nevýhody platformy je problematická kompatibilita s Arduino platformou. Open-source komunita aj samotné STMicroelectronics (firma za vývojom STM32)  oficiálne podporuje šíroké spektrum vývojových dosiek ale horšie je to s perifériami - v prípade
+tejto bakalárskej práce hlavne zobrazovacie zariadenia. Našťastie súčasný stav je taký, že po vynaložení úsilia ste schopný dohladať funkčný driver pre väčšinu displejov. (alebo si ho napísať sám, čo je prekvapivo v niektorých
+prípadoch rýchlejšie ako nejaký funkčný nájsť) - pomerne často ale narazíte na problém, že driver nefunguje tzv. Out-of-the-box (pozn. použijete driver bez modifikácie). Často musíte aspoň tušiť, ako funguje samotný driver predtým
+než ho upravíte a tým pádom to rozhodne nie je dobrá platforma pre úplných nováčikov v programovaní narozdiel od Arduina. 
+
+1.1.2 ArduinoIDE vs STM32CubeIDE
+Tak ako aj Arduino aj STM32 má svoje integrované vývojové prostredie. Volá sa STM32CubeIDE a ide o profesionálny editor. Má oveľa viac možností a podstatne lepšie funguje v spolupráci s STM32 doskami ako Arduino IDE (pozn. iba s originálmi,
+klony STM32CubeIDE odmietajú "spolupracovať") ale má svoje typické nevýhody profesionálnych editorov - je komplikovaný, zložitý a pomerne vysoko hardwarovo náročný narozdieľ od Arduino IDE. Na úvod do hardwaru bohate postačujú možnosti
+Arduino IDE a študent nepotrebuje na ovládnutie editoru tak veľké množstvo času ako pri STM32CubeIDE. Arduino IDE poskytuje editor kódu, Arduino knižnicu, integrovaný inštalátor knižníc tretej strany a sériové pripojenie na dosku na prípadný debugging kódu. Nič viac 
+na prácu na laboratórnych pracach potrebovať nebudete.
+
+
+Podkapitola 1.2 Laboratórne práce a ich súčasný stav 
+
+1.2.1 Laboratórne práce dostupné na internete
+
+Súčasným problémom IoT segmentu je taký, že je to doslova divoký západ - existuje minimum knih ohľadom tejto témy, minimálna
+snaha zo strán výrobcov o spoluprácu a štandartizáciu. To sa odráža aj na kvalite laboratórnych prác pre zobrazovacie zariadenia. 
+
+Drvivú väčšinu času používajú knižnice, sú naprogramované s rôznou kvalitou kódu (rôzne magické hodnoty a celá logika 
+v jednej funkcii nie je žiadnou výnimkou ), je to jednoducho chaos. Ak aj natrafíme na nejakú lepšiu laboratórnu prácu tak je 
+väčšinou spracovaná formou článku a nie zadania - autor vysvetľuje dopodrobna princíp kódu ale nedáva veľa priestoru 
+pre čitateľa aby si danú prácu spracoval sám. Myslím hlavne štruktúru daného zadania - podúlohy, vysvetlenie 
+základných konceptov a potom priestor pre vlastnú kreativitu čitateľa.
+
+1.2.2 Laboratórne práce 
+
+Ako zadanie bakalárskej práce som dostal spracovať všetky bežne dostupné zobrazovacie zariadenia a vyvinúť pre každé nejaké zadanie.
+Išiel som postupne od základných LED diód až po OLED displej. Snažil som sa používať knižnice čo najmenej - ide hlavne o to aby si študent
+vyskúšal čo najviac konceptov v praxy a aby ich aj riadne pochopil. Napríklad pri LED som sa zameral na PWM a prácu s analógovými pinmi,
+pri 7 segmentovom a LCD displeji majú za úlohu napísať driver od nuly. Ak som bol okolnosťami donútený použiť drivery tak som sa snažil urobiť
+aspoň tie úlohy zaujimavé - za zmienku stojí GUI (grafické uživateľské rozhranie) pre čítačku prstov, poprípade "smart" OLED budík.
+Zameral som sa na základné koncepty ktoré sa používajú v profesionálnej praxi. Spomeniem najdôležitejšie, PWM (Pulse Width Modulation), analógové 
+piny, práca s datasheetmi, bitové operácie a debouncing tlačítiek. 
+
+Kedže som na začiatku práce bol v tomto odvetví nováčik tak som si musel sám prejsť celým procesom učenia. Sám teda viem na čo sa zamerať 
+pri skladbe zadania - čo treba viac vysvetliť a čo naopak nie je až tak nutné. Nezabudol som samozrejme aj na štábnu kultúru kódu a rady
+ako zooptimalizovať a urobiť riešenie zadania viac čitateľnejšie.  
+
+Podkapitola 1.3 Vývoj s Blue Pill
+
+Rozhodol som sa vytvoriť samostatnú kapitolu pre vývojovú dosku. Kedže ide o klon tak bohužial žiadnu oficiálnu podporu neočakávajte.
+Na internete sú roztrúsené návody a typy ako opraviť väčšinu z chýb. Nájsť, výskúsať, poprípade prísť na riešenie chyby sám stálo 
+nezanedbateľné množstvo času času. Preto som sa rozhodol funkčné typy a riešenia koncentrovať do jednej ucelenej kapitoly. Bohužiaľ
+nejde o definitívny list problémov a ich riešenia, som si ale pomerne istý že na väčšinu problémov na ktoré natrafíte počas vývoja to bude 
+dostatočné. 
+ 
+
+
+ 
+
+
+
+
+
+
+
+

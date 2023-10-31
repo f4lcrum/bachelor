@@ -1,0 +1,90 @@
+The content of this chapter is an overview of imaging devices used when working on laboratory tasks. To begin with, we introduce the term "electronic display" and then continue with a more detailed description of display devices
+used in laboratory tasks. We will end the chapter with Bluepill's communication methods with individual display devices.
+
+
+2.2 Display devices
+
+LEDs -
+
+It is a semiconductor electronic component that emits light when an electric current passes through it. The pinout is very simple and consists of two pins: the longer pin is the anode to which the positive voltage travels and the shorter pin is the Cathode which is
+connected to earth. To work with the Bluepill and the LED diode, it will be necessary to connect a resistor. On the website of the manufacturer, you will usually come across a description where it describes in more detail how many Ohm resistors are needed for different types of voltage. In case of not strong enough
+resistor, there is a risk of significantly shortening the lifetime of the LED diode, even destroying the diode itself. This is because Bluepill works with 3.3V and the LED diode is structurally adapted to a maximum of 1.79V (Source: https://dratek.cz/arduino/1031-led-dioda-cervena-5mm.html )
+
+NEOPIXEL WS2812
+
+It is an Intelligent control LED integrated light source. A part of each LED is an RGB chip that allows you to set a color combination that will remain saved even after the electricity is disconnected.
+Up to 256 brightness levels, 16777216 colors can be set. It also enables cascade mode, where 24-bit data packets are sent serially. For example, we have three saltiers, we send 72 bits. The first LED takes 24 bits, sets the color and sends the rest of the message to the next LED, which takes
+another 24 bits, sets the color and sends the rest on. 3. The LED has the last 24 bits and repeats the operation of the previous LEDs.
+
+SOURCE: https://cdn-shop.adafruit.com/datasheets/WS2812B.pdf
+Throw here a picture from the Data transmission method datasheet
+
+ 
+
+LED 7 SEGMENT DISPLAY
+
+The 7 segment display uses 7 LED segments to illuminate. We display individual numbers by illuminating certain segments so that they resemble numbers.
+
+(photo of the pinout)
+
+
+Pinout D1-D4 send current to individual digits. Thus, to display, for example, the number three on the second digit, it is necessary to turn on pin D2, and then it is possible to light up the corresponding segments as
+to resemble the number three
+Pinout A-G lights up given segment on turned on DX cipher.
+
+Unfortunately, you may encounter the fact that displays from other manufacturers have D1-D4 pins stored the other way around. Also, a big source of errors is whether the given display uses a common anode or a common cathode.
+In the case of a common anode, the pin must be grounded in order for the segment or digit to light up. On the contrary, in the case of a common cathode.
+
+
+LED MATRIX MAX 7219
+
+It is an LED matrix module with LED Display Driver MAX 7219. It allows persistent storage of the state of up to 64 LEDs. The chip itself provides various interfaces for communication, i.e. SPI, QSPI
+and MICROWAVE. Allows multiple modules to be connected in a cascade. Consumption depends very much on the number of illuminated LEDs, the chip itself also enables Low-power Shutdown, which preserves data with minimal consumption
+electricity. When controlling 7-segment displays, the MAX7219 controller enables BCD decoding. In that case, only 4 bits are enough instead of eight to display the characters 0-9, E, H,
+L, P, and -)
+
+
+LCD 16X2
+
+It is an LCD display capable of holding 16 characters on two lines. It is controlled by Hitachi HD44780 LCD controller or its clone. It is produced in various variants, for example the one already mentioned
+16x2 or 20x4. It contains ROM memory capable of holding up to 240 characters: Of which 208 are 5x8 and 32 are 5x10 (source: 1 page hitachi datasheet). It also contains a Character generator about the size
+64 bytes and is capable of holding 8 custom characters of size 5x8. The problem is that it is a volatile memory and therefore custom characters will not be saved after the display is turned off.
+The most common form of communication with Bluepill is through the parallel interface or through the I2C interface.
+
+Throw in a photo of I2C and Parallel
+
+Don't forget to set the contrast with a screwdriver for the I2C variant.
+In the case of the I2C variant, it is necessary to find the appropriate address. I encountered only 2 I2C addresses, you can find the address simply by the name of the chip on the I2C converter or by software - I2C address detector.
+The parallel variant contains a large number of pins. But it is possible to send data in 4-bit mode instead of 8-bit mode and thus get rid of 4 cables. All known libraries support this mode.
+
+OLED 0.96 SH1106
+
+It is a small display using OLED technology - a thin organic film between the anode and the cathode. OLED, unlike LCD, does not need backlight and provides low consumption, fast response
+and a wide viewing angle. (source: https://techfun.sk/produkt/oled-0-96-display-128x64/?attribute_pa_pocet-pinov=4-piny&currency=EUR&gclid=Cj0KCQjwpompBhDZARIsAFD_Fp9x7Z5SQla6yzcrFiXmCfSruYRh3qq9b9sY6rj5JGUbiX3MJpH5RBYaAt1dEALw_wcB0
+In this size, they have a resolution of 132x64 and the driver is usually of two types: either SH1106 or SSD1306. There are drivers for both displays, even the Adafruit GFX library which provides the basic ones
+graphic primitives - points, lines, circles... for building graphic interfaces. (source: https://github.com/adafruit/Adafruit-GFX-Library )
+
+Bluepill can communicate with OLED displays in two ways: either via SPI or I2C. For the average user, it doesn't really matter, I2C uses four cables, but SPI uses seven.
+  (source: https://cdn.velleman.eu/downloads/29/infosheets/sh1106_datasheet.pdf )
+ 
+ 
+Open-Smart 2.4" 320x240 TFT Touchscreen SPFD5408
+
+Inexpensive, large and colorful TFT display with touch control support. It works natively with almost no problems with Arduino Uno or Mega. The board includes an SD card slot. He serves
+as a potential storage for various bitmap images. On the board we also find an LM75 thermometer that communicates via I2C. The package also includes a stylus. Applications do not occupy the display
+a large amount of memory because the display driver has a large number of types of graphic operations and its own memory. I worked with SPFD5408. There aren't many compatible libraries
+with Bluepill, I therefore recommend using it with Arduino Uno/Mega or choosing a display with a different driver
+
+(source: https://www.laskakit.cz/open-smart-320x240-barevny-lcd-tft-displej-2-4-shield-arduino/ )
+
+Waveshare 1.54" 200x200 ePaper
+
+E-Ink is the so-called electrophoretic display. It is a display that contains white particles in micro capsules dispersed in a thin layer of dark viscous solution. By applying a short pulse
+these white particles move, in some cases they turn towards the front of the display, which causes the given pixel to appear white, by introducing a pulse of the opposite polarity, again as black.
+The high viscosity of the solution causes the changes to assemble even after disconnection from the electricity. But after a long time, you need to clean the screen again so that the changes don't stay forever.
+Source: https://www.waveshare.com/wiki/1.54inch_e-Paper_Module_Manual#Introduction
+
+This model communicates with Bluepill via 3 or 4 pin SPI. It provides a resolution of 200x200.
+Here we encounter the problem of memory requirements, since the display itself does not store any data: all bitmap data must be stored on Bluepill or another development board.
+With 3-color display variants, this problem is even more acute because it is necessary to remember the bitmap for the third color as well. And it is not able to handle this at a resolution of 200x200
+any board. Therefore, I recommend using STM32 boards or a powerful Arduino Mega. The libraries are officially available from the manufacturer Waveshare.

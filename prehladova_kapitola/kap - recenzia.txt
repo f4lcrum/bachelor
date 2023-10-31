@@ -1,0 +1,43 @@
+
+Podkapitola 1.3 Laboratórne práce a ich súčasný stav 
+
+1.3.1 Laboratórne práce dostupné na internete
+
+Súčasným problémom IoT segmentu je taký, že je to doslova divoký západ <!-- stylově nevhodné --> - existuje minimum knih ohľadom tejto témy, minimálna
+snaha zo strán výrobcov o spoluprácu a štandartizáciu <!-- to je silné tvrzení, to bych buď doložila, nebo zmírnila (nebo obojí)-->. To sa odráža aj na kvalite laboratórnych prác pre zobrazovacie zariadenia. 
+
+#já bych začala tím, že nějak vymezíš, co jsou v tomhle kontextu laboratorní práce, jaké laborky na webu jsou a tak; prostě to trochu uvést
+
+<!-- zopakuj podmět, o čem mluvíš; člověk automaticky bere, že se to vztahuje k poslednímu předchozímu podstatnému jménu, což tady nechceš, mluvíš (doufám) o laborkách, ne zobrazovacích zařízeních --> Drvivú väčšinu času používajú knižnice, sú naprogramované s rôznou kvalitou kódu (rôzne magické hodnoty <!-- předpokládám, že magická hodnota je zaužívaný pojem, něco jako BFU, ale stylově to úplně vhodné není--> a celá logika programu
+v jednej funkcii nie je žiadnou výnimkou. Další problém je, že kvalitnejšie  tak je 
+väčšinou spracovaná formou článku a nie zadania - autor vysvetľuje dopodrobna princíp kódu ale nedáva veľa priestoru 
+pre čitateľa aby si danú prácu spracoval sám. Nie sú uvedené podúlohy, vysvetlenie 
+základných konceptov a potom priestor pre vlastnú kreativitu čitateľa. 
+
+1.3.2 Laboratórne práce #je divné, když máš jako 1.2.2 obecnější nadpis než v 1.2; specifikuj to
+
+Spracovávam bežne dostupné zobrazovacie zariadenia a zároveň vytváram pre každé laboratórne zadanie. <!-- ok. to není úplně podstatné, že to máš v zadání; lépe třeba "Zpracovávám všechna běžně dostupná..."-->
+Išiel som postupne od základných LED diód až po OLED displej. Snažil som sa používať knižnice čo najmenej - ide hlavne o to aby si študent
+vyskúšal čo najviac konceptov v praxy a aby ich aj riadne pochopil. <!-- předpokládám, že ty jednotlivé laborky budeš někde víc popisovat (i kdyby v příloze), je teda otázka, jestli to popisovat i tady, nebo to detailněji rozepisuješ jinde--> Napríklad pri LED som sa zameral na PWM a prácu s analógovými pinmi,
+pri 7 segmentovom a LCD displeji majú za úlohu napísať driver od nuly. 
+
+#odstavec
+Ak som bol okolnosťami donútený použiť drivery pre zobrazovacie zariadenia alebo iné periférium (napríklad pre teplomer) tak som sa snažil urobiť
+aspoň tie úlohy zaujimavé - za zmienku stojí GUI (grafické uživateľské rozhranie) pre čítačku prstov, poprípade "smart" OLED budík.
+Zameral som sa na základné koncepty ktoré sa používajú v profesionálnej praxi. Spomeniem najdôležitejšie, PWM (Pulse Width Modulation), analógové 
+piny, práca s datasheetmi, bitové operácie a debouncing tlačítiek. <!-- pro tenhle odstavec platí totéž co pro předdchozí, je otázke, jestli je to fakt relevantní (možná jo)-->
+
+Pri skladbe zadania vychádzam z vlastnej skúsenosti pri snahe pochopiť vývoj programov pre zobrazovacie zariadenia - čo treba viac vysvetliť a čo naopak nie je až tak nutné. Nezabudol som samozrejme aj na štábnu kultúru kódu a rady
+ako zooptimalizovať a urobiť riešenie zadania viac čitateľnejšie.  
+
+
+
+ 
+
+
+
+
+
+
+
+

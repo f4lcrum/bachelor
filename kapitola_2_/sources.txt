@@ -1,0 +1,2 @@
+LCD I2C = https://www.electronics-lab.com/project/using-16x2-i2c-lcd-display-esp32/
+4-7 seg = https://softwareparticles.com/learn-how-a-4-digit-7-segment-led-display-works-and-how-to-control-it-using-an-arduino/
