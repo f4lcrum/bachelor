@@ -4,8 +4,8 @@
 #include <epdpaint.h>
 #include <stdio.h>
 
-#define COLORED     0
-#define UNCOLORED   1
+#define COLORED     1
+#define UNCOLORED   0
 #define TERMINATOR '\n'
 
 Epd epd;
@@ -34,9 +34,8 @@ void loop()
     if(Serial1.available() > 0)      
     {
         paint.Clear(COLORED);
-        paint.Clear(UNCOLORED);
         input = Serial1.readStringUntil(TERMINATOR);        
-        paint.DrawStringAt(0, y, input.c_str(), &Font16, COLORED); // ak biele pozadie tak colored inak uncolored 
+        paint.DrawStringAt(0, y, input.c_str(), &Font16, UNCOLORED); // ak biele pozadie tak colored inak uncolored 
         epd.SetFrameMemory(paint.GetImage(), 0, 0, paint.GetWidth(), paint.GetHeight()); // 0, 0 znamena co vsetko updatnut (teda vsetko v tomto pripade)
         epd.DisplayPartFrame();
    }

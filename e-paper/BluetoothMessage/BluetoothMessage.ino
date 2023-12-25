@@ -4,8 +4,8 @@
 #include <epdpaint.h>
 #include <stdio.h>
 
-#define COLORED     0
-#define UNCOLORED   1
+#define COLORED     1
+#define UNCOLORED   0
 #define TERMINATOR '\n'
 
 Epd epd;
@@ -24,7 +24,7 @@ void setup()
 
     paint.SetWidth(200);
     paint.SetHeight(200);
-    paint.Clear(UNCOLORED); 
+    paint.Clear(UNCOLORED);
     paint.Clear(COLORED);
 }
 
@@ -34,8 +34,9 @@ void loop()
     {
         if (y + 16 >= paint.GetWidth()) {
             Serial1.println("No space, clearing");
-            paint.Clear(COLORED);
-            paint.Clear(UNCOLORED);        
+            epd.Clear();
+            paint.Clear(COLORED); 
+            y = 0;       
         }
         input = Serial1.readStringUntil(TERMINATOR);        
         paint.DrawStringAt(0, y, input.c_str(), &Font16, UNCOLORED);
