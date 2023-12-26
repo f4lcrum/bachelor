@@ -80,7 +80,7 @@ void loop() {
     String input; // "Serial.readStringUntil" returns "String" and not "char*"
     if (Serial.available() > 0) {
         delay(10); // Give some time to byte to arrive in input buffer
-        input = Serial.readStringUntil(TERMINATOR); //to-do ako #define delimeter
+        input = Serial.readStringUntil(TERMINATOR);
         Serial.println(input);
         parse_string(input);
     }
