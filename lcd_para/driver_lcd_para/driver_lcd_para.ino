@@ -1,11 +1,11 @@
 // VSS -> GND
 // VDD -> 5V
 // V0 -> GND
-// A -> Backlight Anode
-// K -> Backlight Cathode
-//The RS (data/instruction select) bit tells the LCD whether we are going to send an instruction or a piece of data. CONNECT TO GND!
+// A -> Backlight Anode to 3.3V
+// K -> Backlight Cathode to GND
+//The R/S (data/instruction select) bit tells the LCD whether we are going to send an instruction or a piece of data. 
 
-// The R/W (read/write) bit tells the LCD whether we wish to read from or to write to RAM.
+// The R/W (read/write) bit tells the LCD whether we wish to read from or to write to RAM. Connect to GND!
 // The E (enable) bit tells the LCD when it should read the data lines.
 #define LCD_CLEAR 0x01
 #define LCD_SETDDRAMADDR 0x80
@@ -199,7 +199,7 @@ void setup()
 
     delay(2000);
 
-    lcd_send_string("4 bit test");
+    lcd_send_string("8 bit test");
     lcd_put_cur(1, 0);
     lcd_send_string("H");
 }
