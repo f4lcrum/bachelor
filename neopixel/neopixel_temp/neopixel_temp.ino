@@ -3,9 +3,9 @@
 
 bluepill_neopixel PIX;
 #define NUM_PIXELS 8
-#define string_port GPIOA
-#define string_pin  7
-
+#define STRING_PORT GPIOA
+#define STRING_PIN  7
+#define SENSOR_PIN PB3
 pixel string[NUM_PIXELS];
 
 typedef struct {
@@ -26,12 +26,12 @@ TemperatureRange ranges[] = {
     {40, 255,   0,   0} // Upper bound placeholder to cover anything above 32.5
 };
 
-Temp_sensor_ds18b20 sensor(PB3);
+Temp_sensor_ds18b20 sensor(SENSOR_PIN);
 
 void setup() {
     // put your setup code here, to run once:
     Serial.begin(9600);
-    PIX.begin(string_port, string_pin); // set pin to output
+    PIX.begin(STRING_PORT, STRING_PIN); // set pin to output
     clear_pixels();
 }
 
@@ -45,7 +45,7 @@ void clear_pixels() {
     for (int i = 0; i < NUM_PIXELS; i++) {
         set_pixel(&string[i], 0, 0, 0);
     }
-    PIX.paint( string[0].bytes, NUM_PIXELS, string_port, string_pin );
+    PIX.paint( string[0].bytes, NUM_PIXELS, STRING_PORT, STRING_PIN );
 }
 
 void set_color(double temp) {
@@ -57,7 +57,7 @@ void set_color(double temp) {
             set_pixel(& string[i], 0, 0, 0);
         }
     }
-    PIX.paint( string[0].bytes, NUM_PIXELS, string_port, string_pin );
+    PIX.paint( string[0].bytes, NUM_PIXELS, STRING_PORT, STRING_PIN );
 }
 
 void console_write_temp(double temp) {
