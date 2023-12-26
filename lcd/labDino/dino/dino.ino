@@ -6,6 +6,9 @@
 #define BOMB 2
 #define WIDTH 16
 #define BUTTON PB11
+#define WHITESPACE_CHANCE 70 // lower means harder difficulty
+#define BOMB_CHANCE WHITESPACE_CHANCE + 1
+
 
 int button_state;
 int last_button_state = LOW;
@@ -71,8 +74,7 @@ void init_game() {
     init_terrain();
 }
 
-void setup()
-{
+void setup() {
     Serial.begin(9600);
     pinMode(BUTTON, INPUT_PULLUP);
     lcd.init();
@@ -86,10 +88,10 @@ void setup()
 int new_block() {
     long randNum = random(100);
 
-    if (randNum < 90) {
+    if (randNum <= WHITESPACE_CHANCE) {
         return WHITESPACE;
     }
-    else if (randNum == 91) {
+    else if (randNum == BOMB_CHANCE) {
         return BOMB;
     }
     return CACTUS;
