@@ -86,9 +86,8 @@ void init_encoder() {
 
 void read_button() {
     setTimeMode = static_cast<SetMode>((setTimeMode + 1) % 3);
-    encoder_pos = 0;
+    encoder_pos = setTimeMode == HOURS ? _hours : setTimeMode == MINUTES ? _minutes : _seconds ;
     refresh_display();
-    alarm_menu();
 }
 
 void print_settings() {
@@ -138,7 +137,6 @@ void button_logic() {
     int btnState = digitalRead(SW);
     if (last_SW_state == LOW && btnState == HIGH) {
         read_button();
-        delay(300);
     }
     last_SW_state = btnState;  
 }
@@ -146,4 +144,5 @@ void button_logic() {
 void loop() {
     button_logic();
     refresh_display();
+    delay(70);
 }
