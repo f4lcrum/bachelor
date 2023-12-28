@@ -122,6 +122,7 @@ void buttons_logic() {
     int units_button_state = digitalRead(UNITS_CHANGE_BUTTON);
     int show_date_button_state = digitalRead(SHOW_DATE_BUTTON);
 
+    Serial.println(power_button_state);
     if (last_state_pwrbutton == LOW && power_button_state == HIGH) {
         power_off();
     }
