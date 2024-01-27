@@ -1,0 +1,2 @@
+https://mischianti.org/stm32-programming-stm32f1-stm32f4-via-usb-with-hid-boot-loader-3/ -- treba flashnut
+potom mozes robit vobec
