@@ -25,12 +25,10 @@ void setup() {
     for (int i = 0; i < SEGMENTS; i++){
         pinMode(pins[i], OUTPUT);
     }
-    Serial.begin(9600);
-    pinMode(D1, OUTPUT);
-    pinMode(D2, OUTPUT);
-    pinMode(D3, OUTPUT);
-    pinMode(D4, OUTPUT);
-    pinMode(BUTTON, INPUT_PULLUP);  
+    for (int i = 0; i < DIGITS; i++) {
+        pinMode(dPins[i], OUTPUT);    
+    }
+    pinMode(BUTTON, INPUT_PULLUP);
 }
 
 void print_number(int num) {
@@ -40,16 +38,16 @@ void print_number(int num) {
     if (num > 9999) {
         num = 9999;
     }
-    print_num(0, num / 1000);
+    display_number(0, num / 1000);
     num = num % 1000;
 
-    print_num(1, num / 100);
+    display_number(1, num / 100);
     num = num % 100;
 
-    print_num(2, num / 10);
+    display_number(2, num / 10);
     num = num % 10;
 
-    print_num(3, num / 1);
+    display_number(3, num / 1);
     num = num % 1;
 }
 
@@ -65,7 +63,7 @@ void cipher_enable(int id) {
     clear_segments();
 }
 
-void print_num(int id, unsigned char num)
+void display_number(int id, unsigned char num)
 {
     cipher_enable(id);
     for (int i = 0; i < SEGMENTS; i++) {

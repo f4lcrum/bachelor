@@ -1,0 +1,44 @@
+4-7 segment displej.
+
+Cieľom tejto laboratórnej práce bude napísať veľmi jednoduchý driver pre 4-7 segmentový displej. Následne vytvoriť jednoduché programy a to merač stlačení tlačitka a časovač.
+Kniznice: ziadne
+Equipment: 4-7 segmentovy displej, tlacitko
+
+
+Warm up
+
+Assignment: Naprogramuj merac stlaceni tlacitka. Po kazdom stlaceni sa zvysi cislo na displeji o 1.
+
+Approach: Kedze nepouzivam ziadnu kniznicu tak si budeme musiet spravit vsetko from scratch. 7 segmentovy displej obsahuje 8 pinov -- 1 pre bodku a zvysnych 7 pre samotne cislo. Kazdy z danych pinov: pin A -- G rozsvieti prislusny segment na displeji. 
+
+< obrazok 7 segmentoveho displeju a jeho pins>
+
+Teda bude nutne poslat (alebo neposlat) prud do jednotlivych segmentov tak, aby znazornili cislo. V tomto pripade si treba zistit ci mate 7-segmentovy displej s spolocnou anodou alebo katodou. V pripade katody treba poslat 1dnotku do daneho segmentu aby sa rozsvietil, v pripade anody zas nulu.
+
+4-7segmentovy displej su styri 7-segmentove displeje spojene dokopy. Okrem pinov na ovladanie segmentov su k dispozicii dalsie styri: D1-4. They are used to control the individual digits and determine which signals pass through the LED blocks.
+
+Odporucam si nadefinovat makra pre piny D1-D4 a pin A-G popripade aj DP ak ho planujete pouzivat, button a ine konstanty ktore budete pouzivat v kode (pocet cifier, pocet segmentov).
+Piny na cifry a piny na segmenty som si vlozil do separatnych poli. 8-bitove cisla ktore reprezentuju cisla 0-9 na 7-segmentovom displeji som si ulozil tiez do separatneho pola v hexadecimalnej podobe. 
+Pocitadlo stlaceni tlacidla som inicioval na 0 a definoval premenne ktore drzia predchadzajuci a sucasny stav stlacenia tlacitka. 
+
+Vo funkcii setup() som nastavil pinMode na vsetky piny na displeji na OUTPUT a button na INPUT_PULLUP
+
+V funkcii loop() som cital stav tlacitka a ked sa stlacilo, zvysil som counter o jedna. 
+
+Jadrom programu je funkcia print_number ktora ma na starosti ziskanie jednotlivych cisiel z counteru. Operaciou delenim (najskor 1000, 100, 10 az 1) ziskam jednotlive cifry ktore zapisujem na prislusnu cifru na displeji.
+Vysledok delenia posielam do funkcie "display_number" ktora ma dva argumenty: ktora cifra cisla to je a samotna cifra ktoru ma zobrazit. Funkciu volam 4-krat (pre kazdu cifru cisla)
+
+Vo funkcii display volam funkciu cipher_enable ktora posle signal do jedneho z D pinov. Predtym ale 
+odporucam do kazdeho z D pinov poslat 0 aby nedochadzalo k nedefinovanym stavom a bugom. Az nasledne poslat do zvoleneho D pinu jednicku a idealne vypnut kazdy segment: niektory segment by mohol zostat pod napatim a tym padom by sa zobrazovali cisla nespravne.
+
+Po vykonanii funkcie cipher_enable mozme pristupit k samotnemu zobrazeniu cisla na segmentoch. Jednoduchy for cyklus vykonavany 7 krat zapisuje na pinA nulty bit, na pinB prvy bit atd... vstupneho cisla.
+Pridal som na konci funkcie 5ms delay aby sa cislo na displeji lepsie citalo. Skuste poexperimentovat s dlzkou delayu.
+
+
+CASOVAC
+
+Assigment: Naprogramuj countdown timer. Po stlaceni tlacidla by sa mal countdown spustit odznova
+
+Approach: Ak sa Vam podarila predosla uloha tak tato bude velmi jednoducha. Vo funkcii loop() budete musiet nasimulovat casovac. Pouzil som ciselnu premennu timer ktora drzi cislo. Kazdych 1000ms znizim tuto premennu 
+o jedna a zobrazim tak ako v predchadzajucom priklade cislo na displej.
+
