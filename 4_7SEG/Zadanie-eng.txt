@@ -1,0 +1,44 @@
+4-7 segment display.
+
+The goal of this laboratory work will be to write a very simple driver for a 4-7 segment display. Then create simple programs, namely a button press counter and a timer.
+Libraries: none
+Equipment: 4-7 segment display, button
+
+
+Warm up
+
+Assignment: Program a button press meter. After each press, the number on the display increases by 1.
+
+Approach: Since I am not using any library, we will have to make everything from scratch. A 7-segment display contains 8 pins -- 1 for the dot and the remaining 7 for the number itself. Each of the given pins: pin A -- G lights up the corresponding segment on the display.
+
+<image of the 7-segment display and its pins>
+
+
+!!!!!!!!!!
+Thus, it is necessary to send HIGH (or LOW) to the individual segments so that they represent the number. In this case, you need to find out if you have a 7-segment display with a common anode or cathode. To light up the cathode, send a HIGH signal to the given segment. On the other hand, to light up the segments of the anode, send a LOW signal.
+
+A 4-7-segment display is four 7-segment displays connected together. In addition to the segment control pins, four more are available: D1-4. They are used to control the individual digits and determine which signals pass through the LED blocks.
+
+I recommend defining macros for pins D1-D4 and pin A-G  (or DP if you plan to use it), button and other constants that you use in the code (number of digits, number of segments).
+I put the pins for the numbers and the pins for the segments in separate arrays. I save the 8-bit numbers that represent the numbers 0-9 on the 7-segment display in a separate array in hexadecimal form.
+I initialize the button press counter to 0 and defined variables that hold the previous and current button press status.
+
+In the setup() function, set the pinMode for all the pins on the display to OUTPUT and the button to INPUT_PULLUP
+
+In the loop() function, read the state of the button and when it is pressed, increment the counter by one.
+
+The core of the program is the print_number function, which is responsible for obtaining individual digits from the counter variable. By the division operation (first 1000, 100, 10 and 1), you get individual digits that I send on the corresponding digit pin on the display.
+I send the division result to the "display_number" function, which has two arguments: which digit of the number it is and the digit itself to be displayed. I call the function 4 times (for each digit of the number)
+
+In the display function, I call the cipher_enable function, which sends a signal to one of the D pins. But before that
+I recommend sending LOW to each of the D pins:  to avoid undefined states and bugs. Next, send a HIGH to the selected D pin and ideally turn off each segment: some segment could remain under voltage and the numbers would be displayed incorrectly.
+
+After executing the cipher_enable function, a digit can be displayed. A for loop is used to send bits of the input digit to different pins. The zero bit is sent to pinA, the first bit to pinB, the second bit to pinC, and so on.
+Add a 5ms delay at the end of the function to make the number on the display easier to read. It prevents a annoying blinking effect. Try experimenting with a longer delay.
+
+
+Countdown timer
+
+Assignment: Program a countdown timer. After pressing the button, the countdown should start over again.
+
+Approach: If you succeeded in the previous task, this one is very simple. The easiest way to achieve this is to create an integer variable that you decrement by one every 1000ms. Use already defined functions to display number.
