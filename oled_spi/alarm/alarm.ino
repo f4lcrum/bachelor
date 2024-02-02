@@ -15,8 +15,6 @@
 #define OLED_RESET PB14
 // basic push buttons
 #define BUTTON_CONFIRM PA11
-//RTC SQW for alarm
-#define CLOCK_INTERRUPT_PIN PB3
 
 Adafruit_SH1106 display(OLED_DC, OLED_RESET, OLED_CS, SPI_PORT);
 int last_SW_state = LOW;
