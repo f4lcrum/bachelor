@@ -9,7 +9,7 @@ Warm up
 
 Assignment: Program a button press meter. After each press, the number on the display increases by 1.
 
-Approach: Since I am not using any library, we will have to make everything from scratch. A 7-segment display contains 8 pins -- 1 for the dot and the remaining 7 for the number itself. Each of the given pins: pin A -- G lights up the corresponding segment on the display.
+Approach: Since I do not user any library, I have to make everything from scratch. A 7-segment display contains 8 pins -- 1 pin for the dot and the remaining 7 pins for the number itself. Each of the given pins: pin A -- G lights up the corresponding segment on the display, pin DP lights up dot segment.
 
 <image of the 7-segment display and its pins>
 
