@@ -1,0 +1,89 @@
+The goal of this lab assignment will be to create a copy of Dinosaur Game from a popular web browser. The scoring system is up to you, the Dinosaurs's jumping is controlled by a button. The Dinosaur only moves in the Y direction: up and down, 
+it doesn't move in the X direction (it doesn't go forward or backward). The final version of the game contains obstacles - cactus that can kill Dinosaur and thus end the game. In addition to obstacles, there 
+is also a point bonus in the game that Dinosaur can get and actually improve his score. Obstacles and bonuses come from the right side of the screen, just like in the original Dinosaur game.
+
+Library: LiquidCrystal_I2C
+Equipment: HITACHI HD44780 I2C, Button
+
+
+Warm up
+
+Assignment: Program a simplified version of the Dinosaur game. Obstacles do not need to be implemented yet, just implement the movement of the Dinosaur. Score increases for Dinosaur only when he is in the bottom position. A jump is performed by clicking a button. Score is displayed in the upper right corner.
+
+Approach: As mentioned in the 3rd chapter, the HITACHI HD44780 enables the recording of 8 custom characters in its internal memory. This online tool serves as a helper: https://omerk.github.io/lcdchargen/ . Thanks to this, we can upload our own character Dinosaur (later also obstacles) to the display memory.
+
+In the global space, in addition to defining macros and global variables, I also defined the Dinosaur bitmap and initialized an instance of the LiquidCrystal_I2C class:
+
+
+#include <LiquidCrystal_I2C.h>
+
+#define Dinosaur 0
+#define BUTTON PB11
+
+int score = 0;
+bool Dinosaur_LOWER_POS = false;
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+byte Dinosaur [8]
+{
+     B00000,
+     B00111,
+     B00101,
+     B10111,
+     B11100,
+     B11111,
+     B01101,
+     B01100,
+};
+
+
+The initialization function of the LiquidCrystal_I2C class takes the I2C device address, display width and display height as input arguments. Majority of displays have an I2C address of 0x27, but it may happen that the given display does not have such an address. In that case, you need an I2C scanner. More on this page: https://www.instructables.com/How-to-Use-LCD-HD44780-I2c/
+Hitachi HD 44780 is made in different sizes, for example with a width of 20 characters and a height of 4 characters. Therefore, display width and height is specified as parameters in the initialization of the LiquidCrystal_I2C class.
+
+Necessary functions that are needed to complete the laboratory work:
+
+lcd.init() -- initialize the display, without calling this function the display is non-functional
+
+lcd.backlight() -- turn on the backlight of the display
+
+lcd.createChar(index, charmap) -- place a byte array on the index, for example lcd.createChar(Dinosaur, Dinosaur) stores the byte map "Dinosaur" on the Dinosaur index representing the number 0. It is possible to add up to 8 characters, otherwise the maximum index should apartment 7.
+
+lcd.setCursor(col, row) -- set the display cursor to the corresponding column and row.
+
+lcd.print(string) -- display the string on the corresponding column and row set, e.g. function lcd.setCursor(col, row)
+
+lcd.write(index) -- very similar to the print function, it only displays custom characters based on the index you set with the function lcd.createChar(index, charmap)
+
+lcd.clear() -- clear display, set cursor position to zero
+
+
+Dinosaur game
+
+
+Assignment: Expand the Warm up task with obstacles. As an obstacle, for example, a cactus, you can also give some rewards, a bomb will instantly add 50 score points.
+
+Approach: Compared to the warm up, new mechanics have been added, namely obstacles. We will use a simple 16-element byte array to generate and display obstacles. 16 in order to use the maximum width of the display. In the case of a 20x4 display, you can expand the field to 20 elements.
+
+The core of the program is the game() function, which is in charge of the game itself: i.e. calling the graphic() function (we'll talk about that later), scoring system and "death" Dinosaur.
+
+
+void game() {
+     graphic();
+     if (Dinosaur_LOWER_POS) {
+         if (terrain[0] == CACTUS) {
+             game_over();
+             delay(5000);
+             init_game();
+         }
+         if (terrain[0] == BOMB) {
+             score += 50;
+         }
+         score++;
+     }
+}
+
+
+
+The graphic() function handles graphics: moving Dinosaur on the screen, generating obstacles, and showing score. We will skip the Dinosaur_move() and score_board() functions, since they are not that important.
+
+The movement of obstacles to Dinosaur from right to left solves the first for cycle by shifting the element in the terrain field to the left. The if condition in the body guarantees that the Dinosaur character does not shift off the screen if it is in the bottom position. In the case of obstacles and bonuses, shifting off the screen is required. Delay is added there to slow down movement of obstacles and bonuses. We place a new randomly selected obstacle on the last place of the terrain field.
+The last for loop just displays the individual elements of the terrain field on the screen

@@ -1,0 +1,90 @@
+Cielom tejto laboratornej ulohy bude vytvorit kopiu hry Dinosaur Game z znameho weboveho prehliadaca. Scorovaci system je na Vas, skakanie dinosaura sa ovlada tlacitkom. Dino sa pohybuje iba v smere Y: teda hore a dole, v smere X sa nehybe nijak (nejde dopredu ani dozadu). Finalna verzia hry obsahuje prekazky - kaktusy ktore dokazu Dina zabit a tym skoncit hru. Okrem nepriatelov je v hre aj bodovy bonus ktory moze DINO ziskat a zlepsit si vlastne skore. Prekazky a bonusy prichadzaju z pravej strany displeja, presne ako v originalnej hre Dino.
+
+Kniznice: LiquidCrystal_I2C
+Equipment: HITACHI HD44780 I2C, Button
+
+
+Warm up
+
+Assignment: Naprogramuj zjednodusenu verziu hry Dino. Bez prekaziek, staci ak Dino vie skakat dole a hore. Score zvys Dinovi iba ked je v spodnej pozicii. Skok sa vykonava prostrednictvom kliknutia na tlacitko. Score zobraz v pravom hornom rohu.
+
+Approach: Ako je spomenute v 3. kapitole, tak HITACHI HD44780 umoznuje nahratie 8 custom characteru do svojej internej pamate. Ako pomocka sluzi tento online nastroj: https://omerk.github.io/lcdchargen/ . Vdaka tomu si mozeme nahrat vlastnu postavu Dina (neskor aj prekazky) do pamate displeja. 
+
+V globalnom priestore som okrem definicii makier a globalnych premennych zadefinoval aj bitmapu Dina a inicializoval som instanciu triedy LiquidCrystal_I2C: 
+
+
+#include <LiquidCrystal_I2C.h>
+
+#define DINO 0
+#define BUTTON PB11
+
+int score = 0;
+bool DINO_LOWER_POS = false;
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+byte dino [8]
+{
+    B00000,
+    B00111,
+    B00101,
+    B10111,
+    B11100,
+    B11111,
+    B01101,
+    B01100,
+};
+
+
+Inicializacna funkcia triedy LiquidCrystal_I2C berie ako vstupny argument I2C device adress, sirka displeja a vyska displeja. 90% displejov ma I2C adresu 0x27, moze sa ale stat ze dany displej taku adresu nebude mat. V tom pripade treba I2C scanner. Viac na tejto stranke: https://www.instructables.com/How-to-Use-LCD-HD44780-I2c/
+Hitachi HD 44780 sa robi v roznych velkostiach, napriklad aj s sirkou 20 znakov a vyskou 4 znaky. Preto je to specifikovane v inicializacii triedy LiquidCrystal_I2C.
+
+Necessary funkcie ktore su potrebne na vypracovanie zadania:
+
+lcd.init() -- inicializuje displej, bez volania tejto funkcie je displej nefunkcny
+
+lcd.backlight() -- rozsvieti podsvietenie displeja
+
+lcd.createChar(index, charmap) -- na index miesto vlozi byte array, napriklad lcd.createChar(DINO, dino) ulozi bytovu mapu "dino" na index DINO predstavujuci cislo 0. Je mozne pridat až 8 znakov cize maximalny index by mal byt 7.
+
+lcd.setCursor(col, row) -- nastavi kurzor displeja na prislusny stlpec a riadok. 
+
+lcd.print(string) -- zobrazi retazec na prislusnom stlpci a riadku nastaveny napr. funkciou lcd.setCursor(col, row) 
+
+lcd.write(index) -- velmi podobny funkcii print, zobrazuje iba custom znaky na zaklade indexu ktory ste si nastavili pri funkcii lcd.createChar(index, charmap)
+
+
+
+Dino game
+
+
+Assignment: Rozsirit Warm up zadanie o prekazky. Ako prekazku napriklad kaktus, popripade mozte dat aj nejake odmeny, bomba prida instatne 50 score points. 
+
+Approach: Oproti warm up pribudla nova mechanika a to prekazky. Na generovanie a zobrazovanie prekazok pouzijeme jednoduche 16 prvkove byte array. 16 preto aby sme vyuzili maximalnu sirku displeja. V pripade 20x4 displeja mozte rozsirit pole na 20 prvkov. 
+
+Jadrom programu je funkcia game(), ta ma na starosti hru samotnu: teda volanie funkcie graphic() (o tej si povieme neskor), pocitanie skore a "smrt" Dina.
+
+
+void game() {
+    graphic();
+    if (DINO_LOWER_POS) {
+        if (terrain[0] == CACTUS) {
+            game_over();
+            delay(5000);
+            init_game();
+        }
+        if (terrain[0] == BOMB) {
+            score += 50;
+        }
+        score++;
+    }
+}
+
+
+
+Funkcia graphic() riesi grafiku: pohyb Dina na obrazovke, generovanie prekazok a zobrazenie skore. Funkciu dino_move() a score_board() preskocime, kedze nie su az tak dolezite. 
+
+Pohyb prekaziek k Dinovi zlava doprava riesi prvy for cyklus shiftnutim prvkom v poli terrain dolava. If podmienka v tele zarucuje, aby postavicku Dina neshiftlo mimo obrazovku v pripade, ze je na spodnej pozicii. V pripade prekaziek a bonusov shifnutie mimo obrazovku je ziadane. Delay je tam pridany kvoli zjednoduseniu hrania. Na posledne miesto pola terrain usadime novu nahodne vybranu prekazku. 
+Posledny for cyklus uz len zobrazi jednotlive prvky pola terrain na obrazovku
+
+
+
+   

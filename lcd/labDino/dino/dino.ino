@@ -11,10 +11,7 @@
 
 
 int button_state;
-int last_button_state = LOW;
 int score = 0;
-unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
-unsigned long debounceDelay = 50;    // the debounce time; increase if the output flickers
 bool DINO_LOWER_POS = true; // initial position, if false he is on upper floor
 // First parameter is address of I2C bus slave, all 3 addresses (A0, A1, A2) were set to 1. Explanation: I2C have 7-bit address, the first four bits of PFC8754A are "0111", the lower 3 bits (A0, A1, A2) are set to 1, so the whole address is "0111111" in binary, 0x3F in he   x
 // PB6 SCL, PB7 SDA
@@ -105,10 +102,12 @@ void score_board() {
 }
 
 void graphic() {
+    dino_move();
     score_board();
     for (int i = 0; i <= WIDTH - 2; i++) {
-        if (DINO_LOWER_POS && i == 0 && terrain[i + 1] == WHITESPACE) {
-            continue;
+        // aby neprepisalo dina prekazkami ked bude dole zbierat skore 
+        if ((DINO_LOWER_POS && i == 0) && terrain[i + 1] == WHITESPACE) {
+             continue;
         }
         terrain[i] = terrain[i + 1];
     }
@@ -145,7 +144,7 @@ void set_dino_higher() {
     terrain[0] = WHITESPACE;
 }
 
-void dino_jump() {
+void dino_move() {
     if (DINO_LOWER_POS) {
         set_dino_lower();
     } else {
@@ -153,8 +152,7 @@ void dino_jump() {
     }
 }
 
-void play() {
-    dino_jump();
+void game() {
     graphic();
     if (DINO_LOWER_POS) {
         if (terrain[0] == CACTUS) {
@@ -177,6 +175,6 @@ void loop() {
         DINO_LOWER_POS = true;
     }
 
-    play();
+    game();
     delay(100);
 }
