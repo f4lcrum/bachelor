@@ -106,6 +106,7 @@ void alarm_menu() {
 }
 
 void read_encoder() {
+    alarm_set = false;
     display.clearDisplay();
     int lower_bound;
     int upper_bound;
@@ -194,7 +195,7 @@ void button_logic() {
     int btnConfirmState = digitalRead(BUTTON_CONFIRM);
     if (last_SW_state == LOW && btnState == HIGH) {
         read_button();
-        delay(300);
+        //delay(300);
     }
     if (btnConfirmState == HIGH) {
         if (millis() - lastButtonPress > 50) {
