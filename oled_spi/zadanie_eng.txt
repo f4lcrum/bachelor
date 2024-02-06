@@ -1,0 +1,205 @@
+The goal of this laboratory assignment will be to create a simple countdown timer. The rotary encoder is used to set the time, the button is used to confirm the action.
+
+Libraries: Adafruit_SH1106_STM32
+Equipment: OLED SPI SH1106, Rotary encoder, Button
+
+Warm up
+
+Assignment: Program the countdown timer. Selection and setting of time units -- hour/minute/second is controlled by a rotary encoder.
+Time units - select seconds/minutes/hours by clicking on the rotary encoder push button.
+
+Approach: As in almost every assignment, it will be necessary to create an instance of the library that controls the display, in our
+case Adafruit_SH1106.
+
+\begin{markdown}
+
+// hardware SPI1 (the default case): SDA(MOSI)=PA7, SCK=PA5
+#define SPI_PORT 1 // 1:SPI1, 2:SPI2
+
+// oled pins
+#define OLED_DC PB15
+#define OLED_CS PB12
+#define OLED_RESET PB14
+
+Adafruit_SH1106 display(OLED_DC, OLED_RESET, OLED_CS, SPI_PORT);
+
+\end{markdown}
+
+
+The initialization function of the Adafruit_SH1106 class takes as an input argument the SPI pins of the oled and the SPI port you want to use.
+
+Initialization functions of the Adafruit_SH1106 library include:
+
+display.begin(SH1106_SWITCHCAPVCC) -- initializes the display, without calling this function the display is inactive
+display.display() -- displays the contents of the display memory
+display.clearDisplay() -- clear display memory
+
+I recommend defining the function init_oled() which will do all these necessary steps.
+This function also serves as a test of the correct connection of the display. In the initial state, the display shows the Adafruit logo. Delay
+with a length of 2000 ms, it is there so that you have enough time to notice the logo on the display.
+
+\begin{markdown}
+
+void init_oled() {
+     display.begin(SH1106_SWITCHCAPVCC);
+     display.display();
+     delay(2000);
+     display.clearDisplay();
+}
+
+\end{markdown}
+
+Necessary step is initialization of rotary encoder. The rotary encoder contains 3 pins (not including GND and VCC) --
+CLK, DT and SW. Thanks to the CLK and DT pins, we can find out which direction the rotary encoder knob is turning. SW is push button of rotary encoder.
+
+I recommend creating a separate function that initializes the rotary encoder. We use interrupts to process the movement of the rotary encoder. The principle is simple, pause
+program run and call ISR: Interrupt Service Routine. This is a function that is always executed when the program is interrupted. After all the ISR instructions of the function have been executed, the run
+returns the program to the place where it was interrupted and continues the execution of instructions.
+
+\begin{markdown}
+
+void init_encoder() {
+     pinMode(CLK, INPUT);
+     pinMode(DT, INPUT);
+     pinMode(SW, INPUT_PULLUP);
+     lastStateCLK = digitalRead(CLK);
+     attachInterrupt(digitalPinToInterrupt(DT), read_encoder, CHANGE);
+}
+
+\end{markdown}
+
+attachInterrupt(digitalPinToInterrupt(pin), ISR, mode)
+* pin, in our case DT
+* ISR, a pointer to a function that is called at every interrupt
+* mode, defines the circumstances under which the interrupt should be performed, during development we can use CHANGE -- it is activated when there is any change in the value on the pin
+
+
+The most important part is the ISR itself. It is defined as any other function. But there are differences compared to the normal functions.
+
+* It cannot have any input parameters
+* Must return void
+
+
+Is it highly recommended to have variables shared between ISR functions and normal functions declared as "volatile". This tells the compiler that such variables might change at
+any time, and thus the compiler must reload the variable whenever you reference it, rather than relying upon a copy it might have in a processor register.
+(source: https://www.arduino.cc/reference/en/language/functions/external-interrupts/attachinterrupt/ )
+
+
+ISR function read_encoder is in charge of setting the time according to the rotation of the encoder's knob. At the beginning, we set a limit for hours, minutes and seconds.
+The core of the function is to find out whether we rotate left-right or right-left. We subtract or add values accordingly. Let's explain how it works.
+
+
+<THROW A PICTURE OF THAT ROTARY ENCODER HERE AND FEEL IT>
+
+Principle of rotary encoder is tricky. By turning the encoder knob from left to right, the contact zone will come into contact first
+CLK pin. If the CLK pin is active (it touches the contact zone), then by finding out if the DT pin is active, we can determine the direction. DT pin is active when we turn from left to right -- po
+touching the CLK pin is also in the immediate vicinity of the DT pin, which must be touched when approaching it. DT pin is inactive when turning from right to left -- po
+contact with the CLK pin is moving away from the DT pin and thus no contact will occur.
+
+We connected the interrupt to a change in the value on the DT pin. Because of this, when turning right-to-left, we decrement the time and when turning left-to-left, we increment it.
+
+\begin{markdown}
+
+volatile int currentStateCLK;
+volatile int lastStateCLK;
+volatile int encoder_pos = 0;
+
+void read_encoder() {
+     display.clearDisplay();
+     int lower_bound;
+     int upper_bound;
+     if (setTimeMode == HOURS){
+         lower_bound = 0;
+         upper_bound = 23;
+     } else {
+         lower_bound = 0;
+         upper_bound = 59;
+     }
+     currentStateCLK = digitalRead(CLK);
+
+     if (currentStateCLK != lastStateCLK && currentStateCLK == 1) {
+         if (digitalRead(DT) != HIGH) {
+             if (encoder_pos > lower_bound){
+                 encoder_pos--;
+             }
+         }
+         else {
+             if (encoder_pos < upper_bound)
+                 encoder_pos++;
+             }
+         }
+     lastStateCLK = currentStateCLK;
+}
+
+\end{markdown}
+
+Question: Is it incorrect to link an interrupt to a value change on the CLK pin instead of the DT pin?
+
+Answer: It's a good idea! I recommend trying both pins. Has something changed? And if so, why?
+
+In addition to turning the knob of the rotary encoder, we will also use the pushbutton of the rotary encoder. Clicking
+we choose between time units -- hours, minutes and seconds. Each click changes the timemode.
+
+\begin{markdown}
+
+enum SetMode {
+     HOURS,
+     MINUTES,
+     SECONDS
+};
+
+void read_button() {
+     setTimeMode = static_cast<SetMode>((setTimeMode + 1) % 3);
+     encoder_pos = setTimeMode == HOURS ? _hours : setTimeMode == MINUTES ? _minutes : _seconds ;
+     refresh_display();
+}
+
+\end{markdown}
+
+Functions of the Adafruit_SH1106_STM32 library that are necessary to complete the laboratory task:
+
+
+display.setTextSize(size) -- set the text size
+setTextSize(uint8_t s) -- set the text color
+display.setCursor(x, y) -- set the cursor to the x and y coordinates
+display.println(string) -- display the text on the display
+
+Use the display.display() function to display the content from the OLED display's memory. Therefore, it is necessary, for example, to call the function after calling the display.println() function in order to show the changes on the display.
+Be careful not to use long delay functions. The Blue Pill does not respond to interruptions during the delay function, and thus the setting using the rotary encoder works imprecisely.
+
+
+
+Assignment: Expand the countdown time version from Warm up. Add a button. Countdown starts by pressing the button
+
+Approach: If you can use the rotary encoder to set the hours, minutes and seconds, then the assembly can only be simulated by decrementing the seconds, minutes and hours
+countdown timer.
+Since the purpose of this laboratory work is not to create a GUI, I decided to provide functions that are responsible for displaying data to the display.
+
+\begin{markdown}
+
+void print_settings() {
+     char* mode;
+     if (setTimeMode == HOURS) {
+         mode = "Hours";
+     } else if (setTimeMode == MINUTES) {
+         mode = "Minutes";
+     } else {
+         mode = "Seconds";
+     }
+     display.setTextSize(2);
+     display.setTextColor(WHITE);
+     display.setCursor(24, 32);
+     display.println(mode);
+     display.display();
+}
+
+void print_time() {
+     char time_str[9] = "XX:YY:ZZ";
+     snprintf(time_str, sizeof(time_str), "%02d:%02d:%02d", _hours, _minutes, _seconds);
+     display.setTextSize(2);
+     display.setTextColor(WHITE);
+     display.setCursor(18, 14);
+     display.println(time_str);
+}
+
+\end{markdown}

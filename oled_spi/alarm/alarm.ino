@@ -19,9 +19,9 @@
 Adafruit_SH1106 display(OLED_DC, OLED_RESET, OLED_CS, SPI_PORT);
 int last_SW_state = LOW;
 int lastButtonPress = 0;
-int currentStateCLK;
-int lastStateCLK;
-int encoder_pos = 0;
+volatile int currentStateCLK;
+volatile int lastStateCLK;
+volatile int encoder_pos = 0;
 int _hours = 0;
 int _minutes = 0;
 int _seconds = 0;
@@ -55,7 +55,6 @@ void init_encoder() {
     pinMode(DT, INPUT);
     pinMode(SW, INPUT_PULLUP);
     lastStateCLK = digitalRead(CLK);
-    attachInterrupt(digitalPinToInterrupt(CLK), read_encoder, CHANGE);
     attachInterrupt(digitalPinToInterrupt(DT), read_encoder, CHANGE);
 }
 
@@ -119,8 +118,8 @@ void read_encoder() {
     }
     currentStateCLK = digitalRead(CLK);
 
-    if (currentStateCLK != lastStateCLK && currentStateCLK == 1 && alarm_set == false) {
-        if (digitalRead(DT) != currentStateCLK) {
+    if (currentStateCLK != lastStateCLK && currentStateCLK == 1) {
+        if (digitalRead(DT) != HIGH) {
             if (encoder_pos > lower_bound){
                 encoder_pos--;
             }
@@ -171,17 +170,21 @@ void start_alarm() {
 void countdown() {
     display.clearDisplay();
     display.display();  
+    print_time();
+    display.display();
     
     if (_seconds == 0 && _minutes != 0) {
         _minutes--;
         _seconds = 59;
     }
-    if (_minutes == 0 && _hours != 0) {
+    else if (_minutes == 0 && _hours != 0) {
         _hours--;
         _minutes = 59;    
     }
-    _seconds ? _seconds-- : _seconds; 
-    print_time();
+    else {
+		_seconds ? _seconds-- : _seconds;
+	} 
+   
     if (_seconds == 0 && _minutes == 0 && _hours == 0) {
         onAlarm();
     }
@@ -198,12 +201,7 @@ void button_logic() {
         //delay(300);
     }
     if (btnConfirmState == HIGH) {
-        if (millis() - lastButtonPress > 50) {
-            start_alarm();
-        }
-
-        // Remember last button press event
-        lastButtonPress = millis();
+        start_alarm();
     }
     last_SW_state = btnState;
 }

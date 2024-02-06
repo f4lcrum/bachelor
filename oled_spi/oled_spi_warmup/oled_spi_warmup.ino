@@ -12,7 +12,6 @@
 #define OLED_CS    PB12
 #define OLED_RESET PB14
 
-
 Adafruit_SH1106 display(OLED_DC, OLED_RESET, OLED_CS, SPI_PORT);
 int last_SW_state = LOW;
 int last_btn_confirm_state = LOW;
@@ -62,7 +61,7 @@ void read_encoder() {
     currentStateCLK = digitalRead(CLK);
 
     if (currentStateCLK != lastStateCLK && currentStateCLK == 1) {
-        if (digitalRead(DT) != currentStateCLK) {
+        if (digitalRead(DT) != HIGH) {
             if (encoder_pos > lower_bound){
                 encoder_pos--;
             }
@@ -80,7 +79,6 @@ void init_encoder() {
     pinMode(DT, INPUT);
     pinMode(SW, INPUT_PULLUP);
     lastStateCLK = digitalRead(CLK);
-    attachInterrupt(digitalPinToInterrupt(CLK), read_encoder, CHANGE);
     attachInterrupt(digitalPinToInterrupt(DT), read_encoder, CHANGE);
 }
 

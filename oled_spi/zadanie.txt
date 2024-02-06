@@ -1,0 +1,206 @@
+Cielom tejto laboratornej ulohy bude vytvorit jednoduchy countdown timer. Na nastavenie casu sluzi rotary encoder, button sluzi na potvrdenie akcie.
+
+Libraries: Adafruit_SH1106_STM32
+Equipment: OLED SPI SH1106, Rotary encoder, Button
+
+Warm up
+
+Assignment: Naprogramuj nastavovanie casu pre budik. Staci aby otacanim encoderu sa pridavali/uberali sekundy/minuty/hodiny. 
+Casove jednotky -- sekundy/minuty/hodiny vybrat klikanim na rotacnom encoderu.
+
+Approach: Tak ako v skoro kazdom zadani tak aj tu bude nutne vytvorit instanciu kniznice ktora ovlada displej, v nasom 
+pripade Adafruit_SH1106. 
+
+\begin{markdown}
+
+// hardware SPI1 (the default case): SDA(MOSI)=PA7,  SCK=PA5
+#define SPI_PORT   1 // 1:SPI1, 2:SPI2
+
+// oled pins
+#define OLED_DC    PB15
+#define OLED_CS    PB12
+#define OLED_RESET PB14
+
+Adafruit_SH1106 display(OLED_DC, OLED_RESET, OLED_CS, SPI_PORT);
+
+\end{markdown}
+
+
+Inicializacna funkcia triedy Adafruit_SH1106 berie ako vstupny argument SPI piny oled a SPI port ktory chcete pouzit. 
+
+Medzi inicializacne funkcie kniznice Adafruit_SH1106 patri:
+
+display.begin(SH1106_SWITCHCAPVCC) -- inicializuje displej, bez volania tejto funkcie je displej nefunkcny
+display.display() -- zobrazi obsah v pamati displeja
+display.clearDisplay() -- vycisti pamat displeja 
+
+Odporucam si zadefinovat funkciu init_oled() ktora spravi vsetky tieto nevyhnutne kroky
+Zaroven touto funkciou otestujete je displej zapojeny spravne. V inicialnom stave totiz displej zobrazi logo Adafruit. Delay
+s dlzkou 2000 ms je tam na to aby ste mali dostatok casu si vsimnut logo na displeji.
+
+\begin{markdown}
+
+void init_oled() {
+    display.begin(SH1106_SWITCHCAPVCC);
+    display.display();
+    delay(2000);
+    display.clearDisplay();
+}
+
+\end{markdown}
+
+Necessary step is initialisation of rotary encoder. Rotacny encoder obsahuje 3 piny (neratam GND a VCC) --
+CLK, DT a SW. Vdaka CLK a DT pinom vieme zistit ktorym smerom sa rotary encoder toci. SW is push button of rotary encoder.
+
+Odporucam si vytvorit separatnu funkciu ktora inicializuje rotacny encoder. Na spracovanie pohybu rotacneho encoderu pouzijeme interrupty. Princip je jednoduchy, prerusi
+beh programu a zavola ISR: Interrupt Service Routine. Ide o funkciu ktora sa vzdy vykona pri preruseni behu programu. Po vykonani vsetkych instrukcii ISR funkcie sa beh 
+programu vrati na miesto kde bol preruseny a pokracuje vo vykonavanii instrukcii.
+
+\begin{markdown}
+
+void init_encoder() {
+    pinMode(CLK, INPUT);
+    pinMode(DT, INPUT);
+    pinMode(SW, INPUT_PULLUP);
+    lastStateCLK = digitalRead(CLK);
+    attachInterrupt(digitalPinToInterrupt(DT), read_encoder, CHANGE);
+}
+
+\end{markdown}
+
+attachInterrupt(digitalPinToInterrupt(pin), ISR, mode) 
+	* pin, v nasom pripade DT
+    * ISR, pointer na funkciu ktora sa pri kazdom preruseni zavola 
+	* mode, definuje za akych okolnosti sa ma prerusenie vykonat, pocas vyvoja si postacime s CHANGE -- aktivuje sa pri akejkolvek zmene hodnoty na pine
+
+
+Najdolezitejsou castou je samotna ISR. Ta sa definuje ako akakolvek ina funkcia. Su ale rozdiely oproti beznym funkciam.
+
+* Nemoze mat ziaden vstupny parameter
+* Musi vratit void 
+
+
+Is it highly recommended to have variables shared between ISR functions and normal functions declared as "volatile". This tells the compiler that such variables might change at 
+any time, and thus the compiler must reload the variable whenever you reference it, rather than relying upon a copy it might have in a processor register.
+(zdroj: https://www.arduino.cc/reference/en/language/functions/external-interrupts/attachinterrupt/ )
+
+
+ISR funkcia read_encoder ma na starosti nastavovanie casu podla otocenia encoder's knobu. Na zaciatku nastavujeme obmedzenie pre hodiny, minuty a sekundy. 
+Jadrom funkcie je zistenie, ci otacame zlava-doprava alebo zprava-dolava. Podla toho uberame alebo pridavame hodnoty. Vysvetlime si ako to funguje.
+
+
+<HOD SEM OBRAZOK TOHO ROTACNEHO ENCODERU A OCITUJ TO>
+
+Principle of rotary encoder is tricky. Tocenim encoder knobu zlava doprava sa prvy ku dotyku s contact zone dostane 
+CLK pin. Ak je CLK pin aktivny (dotyka sa contact zone) tak zistenim ci je DT pin aktivity vieme zistit smer. DT pin je aktivny vtedy ked tocime zlava doprava -- po 
+dotyku s CLK pinom je v bezprostrednej blizkosti aj DT pin ktoreho sa musi dotknut kedze sa k nemu priblizuje. DT pin je neaktivny vtedy ked tocime zprava dolava -- po 
+dotyku s CLK pinom je sa oddaluje od DT pinu a tym padom k ziadnemu kontaktu nedojde. 
+
+Interrupt sme si naviazali na zmenu hodnoty na pine DT. Kvoli tomu pri toceni zprava-dolava decrementujeme cas a pri toceni zlava-dolava inkrementujeme.
+
+\begin{markdown}
+
+volatile int currentStateCLK;
+volatile int lastStateCLK;
+volatile int encoder_pos = 0;
+
+void read_encoder() {
+    display.clearDisplay();
+    int lower_bound;
+    int upper_bound;
+    if (setTimeMode == HOURS){
+        lower_bound = 0;
+        upper_bound = 23;
+    } else {
+        lower_bound = 0;
+        upper_bound = 59;
+    }
+    currentStateCLK = digitalRead(CLK);
+
+    if (currentStateCLK != lastStateCLK && currentStateCLK == 1) {
+        if (digitalRead(DT) != HIGH) {
+            if (encoder_pos > lower_bound){
+                encoder_pos--;
+            }
+        }
+        else {
+            if (encoder_pos < upper_bound)
+                encoder_pos++;
+            }
+        }
+    lastStateCLK = currentStateCLK;
+}
+
+\end{markdown}
+
+Question: Je nespravne naviazat interrupt na zmenu hodnoty na pin CLK namiesto pinu DT?
+
+Answer: Je to dobry napad! Odporucam si vyskusat obidva piny. Zmenilo sa nieco? A ak ano, preco?
+
+Okrem otacania knobu rotacneho encoderu budeme pouzivat aj pushbutton rotacneho encoderu. Klikanim 
+vyberame medzi casovymi jednotkami -- hodinami, minutami a sekundami. Kazde kliknutie zmeni timemode.
+
+\begin{markdown}
+
+enum SetMode {
+    HOURS,
+    MINUTES,
+    SECONDS
+};
+
+void read_button() {
+    setTimeMode = static_cast<SetMode>((setTimeMode + 1) % 3);
+    encoder_pos = setTimeMode == HOURS ? _hours : setTimeMode == MINUTES ? _minutes : _seconds ;
+    refresh_display();
+}
+
+\end{markdown}
+
+Funkcie kniznice Adafruit_SH1106_STM32 ktore su nutne na splnenie laboratornej ulohy:
+
+
+display.setTextSize(size) -- nastavi velkost textu
+setTextSize(uint8_t s) -- nastavi farbu textu
+display.setCursor(x, y) -- nastavi cursor na suradnice x a y
+display.println(string) -- zobrazi text na displeji
+
+Pomocou funkcie display.display() zobrazite obsah z pamati OLED displeja. Preto je nutne napriklad po volani funkcie display.println() funkciu zavolat aby sa zobrazili zmeny na displeji.
+Dajte si pozor aby ste nepouzivali dlhe delay funkcie. Blue Pill pocas priebehu delay funkcie nereaguje na prerusenia a tym padom funguje nastavovanie pomocou rotacneho encoderu nepresne.
+
+
+
+Assignment: Rozsirte povodnu verziu z Warm up. Pridajte button, po kliknuti sa ma spustit countdown.
+
+Approach: Ak viete pomocou rotacneho encoderu nastavit hodiny, minuty a sekundy tak uz zostava len simulovat dekrementovanim sekund, minut a hodin 
+countdown timer. 
+Kedze zamerom tejto laboratornej prace nie je vytvarat krasne GUI tak som sa rozhodol poskytnut funkcie ktore maju na starost zobrazovanie 
+udajov na displej. 
+
+\begin{markdown}
+
+void print_settings() {
+    char* mode;
+    if (setTimeMode == HOURS) {
+        mode = " Hours ";
+    } else if (setTimeMode == MINUTES) {
+        mode = "Minutes";
+    } else {
+        mode = "Seconds";
+    }
+    display.setTextSize(2);
+    display.setTextColor(WHITE);
+    display.setCursor(24, 32);
+    display.println(mode);
+    display.display();
+}
+
+void print_time() {
+    char time_str[9] = "XX:YY:ZZ";
+    snprintf(time_str, sizeof(time_str), "%02d:%02d:%02d", _hours, _minutes, _seconds);
+    display.setTextSize(2);
+    display.setTextColor(WHITE);
+    display.setCursor(18, 14);
+    display.println(time_str);
+}
+
+\end{markdown}
