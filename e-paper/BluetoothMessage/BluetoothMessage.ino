@@ -4,9 +4,12 @@
 #include <epdpaint.h>
 #include <stdio.h>
 
-#define COLORED     1
-#define UNCOLORED   0
+// #define COLORED     1
+// #define UNCOLORED   0
 #define TERMINATOR '\n'
+
+#define COLORED     0
+#define UNCOLORED   1
 
 Epd epd;
 unsigned char image[10000];
@@ -24,8 +27,13 @@ void setup()
 
     paint.SetWidth(200);
     paint.SetHeight(200);
-    paint.Clear(UNCOLORED);
     paint.Clear(COLORED);
+    reload();
+}
+
+void reload() {
+    epd.SetFrameMemory(paint.GetImage(), 0, 0, paint.GetWidth(), paint.GetHeight());
+    epd.DisplayPartFrame();
 }
 
 void loop()
@@ -36,12 +44,12 @@ void loop()
             Serial1.println("No space, clearing");
             epd.Clear();
             paint.Clear(COLORED); 
+            reload();
             y = 0;       
         }
         input = Serial1.readStringUntil(TERMINATOR);        
         paint.DrawStringAt(0, y, input.c_str(), &Font16, UNCOLORED);
-        epd.SetFrameMemory(paint.GetImage(), 0, 0, paint.GetWidth(), paint.GetHeight());
-        epd.DisplayPartFrame();
+        reload();
         y += 16;
    }
 }

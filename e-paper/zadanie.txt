@@ -1,5 +1,70 @@
 E-paper
 
-The goal of this laboratory work is to write a E-paper notes program. 
+The goal of this laboratory work is to write a E-paper notes program.
+
+Libraries: epd1in54_V2.h, imagedata.h, epdpaint.h (all from link --> https://github.com/waveshareteam/e-Paper/tree/master/Arduino/epd1in54_V2 )
+Equipment: 1.54inch e-Paper (B) (200x200), HC-05 Bluetooth module
+
+Warm up
+
+Assignment: Program the E-paper notes program. Send note via Bluetooth to Serial1 connection and retrieve it. Afterwards, display it on E-paper
+
+Approach: As usually, we need to create an instance of device driver's classes. This time however, we need to create an instace not only for E-paper but for Paint driver. The E-paper hardware capabilities are somewhat limited -- it can just turn on or off pixel on screen, nothing else. Therefore I need another piece of software -- Paint to create necessary graphics, like characters or geometric shapes. It is also necessary to define macros for colors.  
+
+\begin{markdown}
+	#include <SPI.h>
+	#include <epd1in54_V2.h>
+	#include <imagedata.h>
+	#include <epdpaint.h>	
+	#include <stdio.h>
+	
+	#define COLORED     0
+	#define UNCOLORED   1
+
+	Epd epd;
+	unsigned char image[10000];
+	Paint paint(image, 0, 0);
+
+\end{markdown}
+
+I recommend defining the functions which take care of reloading content of E-paper display
+
+\begin{markdown}
+    
+    void reload() {
+        epd.SetFrameMemory(paint.GetImage(), 0, 0, paint.GetWidth(), paint.GetHeight());
+    	epd.DisplayPartFrame();
+    }
+
+\end{markdown}
+
+
+epd.SetFrameMemory(image_buffer, x, y, image_width, image_height) -- sets E-paper's pixels to content of image_buffer, starting from x, y to x + image_witdh and y + image_height.
+epd.DisplayPartFramer() -- displays content of memory.
+
+
+
+Because of limited hardware capabilities of E-paper, Blue Pill need to keep track of image -- the content we want to display on E-paper. Even single-color low resolution display takes up too much of scarse memory out of Blue Pill.
+Therefore, use array with length of 10000 for this laboratory task. However if you work with larger display with greater resolutions or multiple colors, then you can run out of memory pretty quickly.
+
+
+
+The commands necessary to complete this laboratory exercise:
+
+
+epd.LDirInit() -- display initialisation
+epd.Clear() -- clears content from display, to call this function right after LDirInit() call.
+paint.SetWidth(width) -- set width for paint, put resolution width of e-paper (in our case, 200)
+paint.SetHeight(height) -- set height for paint, put resolution height of e-paper (in our case, 200)
+paint.Clear(COLORED) -- puts as background color, use macros COLORED for black background or UNCOLORED for white background.
+paint.DrawStringAt(x, y, text, font, colored) -- puts string on beginning of x and y, font could be only &Font8, &Font12, &Font16, &Font20 or &Font24
+
+I recommend using black background with white text for better readability.
+
+Notes program
+
+Assignment: We need to put multiple notes on display. Add functionality that add every new note on new line. 
+
+Approach: If you don't have any lines left on display, clear display's memory. Width of every sentence depends of used font. Font8 is 8 pixels wide, Font16 is 16 pixels wide etc.
 
 
