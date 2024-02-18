@@ -19,7 +19,7 @@
 #define P2_HOME 7
 #define BOTTOM 7
 #define UPPER 0
-#define REFRESH_DELAY 150
+#define REFRESH_DELAY 250
 #define RESTART_DELAY 1000
 
 struct Ball {
@@ -30,14 +30,13 @@ struct Ball {
 };
 
 struct Paddle {
-    int currentStateCLK;
-    int lastStateCLK;
-    int clk;
-    int dt;
-    int x_pos;
-    int y_pos;
+    volatile int currentStateCLK;
+    volatile int lastStateCLK;
+    volatile int clk;
+    volatile int dt;
+    volatile int x_pos;
+    volatile int y_pos;
 };
-
 
 int score_p1 = 0;
 int score_p2 = 0;
@@ -46,17 +45,17 @@ byte playboard[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 Paddle p1;
 Paddle p2;
 Ball ball;
-typedef void (*UpdateFunctionPointer)();
 LedControl lc=LedControl(DIN_MATRIX, CLK_MATRIX, CS_MATRIX, 1);
 
-void init_paddle(Paddle *p, int clk, int dt, int x, int y, UpdateFunctionPointer updateFn) {
+void init_paddle(Paddle *p, int clk, int dt, int x, int y) {
     p->clk = clk;
     p->dt = dt;
     p->x_pos = x;
     p->y_pos = y;
     pinMode(p->clk, INPUT);
     pinMode(p->dt, INPUT);
-    attachInterrupt(clk, updateFn, CHANGE);
+    p->lastStateCLK = digitalRead(clk);
+    attachInterrupt(digitalPinToInterrupt(dt), update_paddle, CHANGE);
 }
 
 void init_ball() {
@@ -67,17 +66,16 @@ void init_ball() {
 }
 
 
-void restart() {
-    init_paddle(&p1, CLK_ROT0, DT_ROT0, 0, 3, update_p1);
-    init_paddle(&p2, CLK_ROT1, DT_ROT1, 7, 4, update_p2);
+void init_game() {
+    init_paddle(&p1, CLK_ROT0, DT_ROT0, 0, 3);
+    init_paddle(&p2, CLK_ROT1, DT_ROT1, 7, 4);
     init_ball();
     clear_playboard();
-    update_p1();
-    update_p2();
+    update_paddle();
 }
 
 void setup() {
-    restart();
+    init_game();
     lc.shutdown(0,false); //0.ty device zapne teda tvoj jediny matrix
     lc.setIntensity(0,8); 
     lc.clearDisplay(0);
@@ -122,7 +120,7 @@ void adjust_score() {
     Serial.print(score_p2);
     Serial.println(" P2");
     delay(RESTART_DELAY);
-    restart();
+    init_game();
 }
 
 void update_ball() {
@@ -150,30 +148,12 @@ void update_ball() {
     delay(REFRESH_DELAY);
 }
 // interrupt function 
-void update_p1() {
-    p1.currentStateCLK = digitalRead(p1.clk);
+void update_paddle() {
+   p1.currentStateCLK = digitalRead(p1.clk);
+   p2.currentStateCLK = digitalRead(p2.clk);
 
-    if (p1.currentStateCLK != p1.lastStateCLK && p1.currentStateCLK == 1) {
-        if (digitalRead(p1.dt) != p1.currentStateCLK) {
-            if (p1.y_pos > PADDLE_MIN) {
-                p1.y_pos--;
-            }
-        }
-        else {
-            if (p1.y_pos < PADDLE_MAX) {
-				p1.y_pos++;
-            }
-        }
-    }
-    paddle_move(&p1);
-    p1.lastStateCLK = p1.currentStateCLK;
-}
-// interrupt function 
-void update_p2() {
-    p2.currentStateCLK = digitalRead(p2.clk);
-
-    if (p2.currentStateCLK != p2.lastStateCLK && p2.currentStateCLK == 1) {
-        if (digitalRead(p2.dt) != p2.currentStateCLK) {
+   if (p2.currentStateCLK != p2.lastStateCLK && p2.currentStateCLK == 1) {
+        if (digitalRead(p2.dt) != HIGH) {
             if (p2.y_pos > PADDLE_MIN) {
                 p2.y_pos--;
             }
@@ -184,13 +164,28 @@ void update_p2() {
             }
         }
     }
+    if (p1.currentStateCLK != p1.lastStateCLK && p1.currentStateCLK == 1) {
+        if (digitalRead(p1.dt) != HIGH) {
+            if (p1.y_pos > PADDLE_MIN) {
+                p1.y_pos--;
+            }
+        }
+        else {
+            if (p1.y_pos < PADDLE_MAX) {
+                p1.y_pos++;
+            }
+        }
+    }
+    
     paddle_move(&p2);
     p2.lastStateCLK = p2.currentStateCLK;
+    paddle_move(&p1);
+    p1.lastStateCLK = p1.currentStateCLK;
 }
 
 void loop() {
     update_ball();
-    printByte(playboard);
+    print_byte(playboard);
 }
 
 void put_val_playground(int x, int y) {
@@ -201,7 +196,7 @@ void del_val_playground(int x, int y) {
     playboard[y] &= ~(1 << x);
 }
 
-void printByte(byte character [])
+void print_byte(byte character [])
 {
     int i = 0;
     for(i=0;i<8;i++)

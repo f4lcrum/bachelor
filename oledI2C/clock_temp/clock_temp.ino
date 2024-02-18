@@ -2,6 +2,7 @@
 #include <temp_sensor_ds18b20.h>
 #include <Adafruit_SH1106_STM32.h>
 
+
 #define OLED_RESET -1
 #define POWER_BUTTON PA0
 #define UNITS_CHANGE_BUTTON PA1
@@ -9,7 +10,7 @@
 #define BUTTON_DELAY 50
 #define CELSIUS "C"
 #define FAHRENHEIT "F"
-#define TEMP_SENSOR_PIN PB3
+#define TEMP_SENSOR_PIN PB0
 
 // SCL and SDA pins both of OLED and RTC to PB6 and PB7
 RTC_DS3231 rtc;
@@ -61,7 +62,6 @@ void set_print(int color, int text_size, int pos_x, int pos_y) {
 }
 
 void show_date() {
-  	DateTime today =  rtc.now();
   	display.setTextSize(1);
   	display.setTextColor(WHITE);
   	display.setCursor(28, 36);
@@ -70,6 +70,7 @@ void show_date() {
 	display.setTextSize(2);
 	display.setTextColor(WHITE);
 	display.setCursor(8,48);
+    DateTime today =  rtc.now();
 	char today_str[11] = "XX:YY:ZZZZ";
 	snprintf(today_str, sizeof(today_str), "%02d.%02d.%02d", today.day(), today.month(), today.year());
 	display.print(today_str);

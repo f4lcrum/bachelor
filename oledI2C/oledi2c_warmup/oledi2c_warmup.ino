@@ -40,7 +40,7 @@ void show_time() {
     display.println(curr_time);
 }
 
-void show_temp(double temp, char *symbol) {
+void show_temp(double temperature, char *symbol) {
     display.setTextSize(1);
     display.setTextColor(WHITE);
     display.setCursor(28, 36);
@@ -49,7 +49,7 @@ void show_temp(double temp, char *symbol) {
     display.setTextSize(2);
     display.setTextColor(WHITE);
     display.setCursor(24,48);
-    display.print(temp);
+    display.print(temperature);
     display.cp437(true);
     display.write(167);
     display.print(symbol);

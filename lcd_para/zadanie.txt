@@ -1,0 +1,137 @@
+Aim of this laboratory work is to create driver for Hitachi HD44780.
+
+Equipment: Hitachi HD 44780
+Driver: None
+
+Assigment: Create a driver for Hitachi HD44780. It should display strings using 8-bit mode. 
+
+
+Approach:
+
+Display with HD44780 controller communicate via 4 or 8 data links. In case of 4 data links, the data is written twice -- first upper 4 bits and then lower 4 bits. Data is send to DB7-DB4. The communication is controlled by the R/W (Read/Write) link and the enable input E (enable/disable input)
+
+<HOD SEM TABULKU PINOV S VYSVETLENIM>
+
+The display has two types of memory:
+
+DD RAM -- contains characters that appear on the display. It can store up to 80 characters (display can be up with 20 characters per line, 4 lines, in total 80 characters).
+
+CG RAM -- contains up to 8 user defined characters. Address for these custom characters spans from 0x00 to 0x07. For 5x8 dots, eight character patterns can be written, and for 5 x 10 dots, four character patteenrs can be written (cituj 13 stranu hitachi datasheet)
+
+
+As usual, we need to create initialization sequence for display. Because we do not use any driver, we need to create initialization sequence from scratch.
+
+begin{markdown}
+
+	void lcd_init() {
+		init_pins();
+		delay(50);
+		
+		// START OF INIT SEQUENCE
+		lcd_send_command(LCD_FUNCTIONSET | LCD_8BITMODE);
+        delay(5);
+
+        lcd_send_command(LCD_FUNCTIONSET | LCD_8BITMODE);
+        delay(1);
+
+        lcd_send_command(LCD_FUNCTIONSET | LCD_8BITMODE);
+        lcd_send_command(LCD_FUNCTIONSET | LCD_8BITMODE | LCD_2LINE | LCD_5x8FONT);
+		// 
+		delayMicroseconds(50);
+		lcd_send_command(LCD_CLEAR);
+		delay(3);
+		lcd_send_command(LCD_ENTRYMODESET | LCD_ENTRYLEFT | LCD_ENTRYSHIFTDECREMENT);
+		delayMicroseconds(50);
+		lcd_send_command(LCD_DISPLAYCONTROL | LCD_DISPLAYON | LCD_CURSORON | LCD_BLINKON);
+		delayMicroseconds(50);
+	}
+	
+end{markdown}
+
+Let's start with first function "init_pins()". This function sets pinMode to RS, EN, and data pins. 
+Function "set_rs" sends 0 or 1 to RS pin. As I mentioned earlier (Check table), if you want to send commands
+to HD 44780, you have to set RS pin to 0. On the other hand, you have to set RS pin to 1 if you want to send data. (Page 8, HD44780U datasheet). In lcd_init()  I defined macro LCD_CMD -- 0 for instructions
+and LCD_DATA -- 1 for data. It makes sense to send LCD_CMD to RS pin, because lcd_init functions sends only instructions to HD 44780.   
+
+
+\begin{markdown}
+	// RS bit
+	#define LCD_CMD 0
+	#define LCD_DATA 1	
+	
+	void init_pins() {
+		pinMode(RS, OUTPUT);
+		pinMode(EN, OUTPUT);
+		int pin_count = 8;
+		for (int i = 0; i < pin_count; i++) {
+			pinMode(data_pins[i], OUTPUT);
+		}
+		set_rs(LCD_CMD);
+}
+
+\end{markdown}
+
+lcd_send_command function takes as argument command. In our case, command are just bits specified by datasheet. 
+ 
+
+<datasheet figure 11 instruction (1)>
+
+Let's start with clear display command -- for example, define it as "LCD_CLEAR". The only bit set to 1 is LSB (Least significant bit). So set macro to 0x01 (you can use binary, decimal or hexadecimal number system).
+Return home -- for example, define it as "LCD_SETTOHOME". Second least significant bit is set to 1. Set macro to 0x02 
+Function set -- default function with all flags set to 0 have only one pin set to 1: DB5. Macro, let's call it LCD_FUNCTIONSET is set to 0x20. Notice the arguments on DB4 (DL) DB3 (N), and DB2(F)
+DL --  Sets the interface data length. Data is sent or received in 8-bit lengths (DB7 to DB0) when DL is 1,
+and in 4-bit lengths (DB7 to DB4) when DL is 0. When 4-bit length is selected, data must be sent or
+received twice.  (Cituj datasheet 27 strana)
+N -- sets the number of display lines. Display is set to 2-line mode when N is 1. Set N to 1 if you have display with 2 lines.
+F -- sets the character font. 5x10 dots size of character when F is 1, and 5x8 dots size of character when F is 0. 
+
+
+There are two choices: you can hardcode the commands or make it modular like in my function lcd_init. I definitely recommend making it modular, using bitwise OR.
+Function set and it's flags:
+
+\begin{markdown}
+	#define LCD_FUNCTIONSET 0x20
+	// FunctionSet flags
+	#define LCD_5x8FONT 0x00
+	#define LCD_2LINE 0x08
+	#define LCD_8BITMODE 0x10
+	#define LCD_4BITMODE 0x00
+\end{markdown}
+
+
+Sending command or data to HD44780 is fairly uncomplicated: I created two separate functions, one for sending the command, another one for sending data.
+The only difference is in setting of RS pin. 0 for commands, 1 for data.
+
+\begin{markdown}
+	void lcd_send_command(char cmd) {
+        send_to_lcd(cmd, LCD_CMD);
+    }
+	
+	void lcd_send_data(char data)
+    {
+        send_to_lcd(data, LCD_DATA);
+    }
+	
+	void send_to_lcd(char data, int rs) {
+		set_rs(rs);
+		send_byte(data);
+
+		digitalWrite(EN, LOW);
+		delay(2);
+		digitalWrite(EN, HIGH);
+		delay(50);
+	}
+
+	
+\end{markdown}
+
+Notice that in function send_to_lcd, beside of sending 0 or 1 to RS pin, EN pin is set to 0 and then after delay to 1. It is because EN pin is triggered by a rising edge (rising voltage level from zero). (cituj figure 25 write operation)
+
+These commands are necessary to initialize the driver. I recommend define each of these functions and their flags as macro.
+ Check page 26 in Hitachi HD44780 datasheet.
+
+Display clear -- clears content of display and sets cursor on position of first character and first line
+Function set -- sets size of characters, bit mode and count of lines
+Display control -- sets display on/off, curson on/off and cursor blinking on/off
+Entry mode -- sets cursor direction, writing from left to right or vice versa
+Return home -- sets cursor on position of first character and first line. It does not clear the content of display.

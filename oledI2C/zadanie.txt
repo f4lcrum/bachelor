@@ -1,0 +1,88 @@
+The goal of this laboratory work is to create "not-so-smart" watch. You get an experience of working with RTC -- Real time clock, temperature sensor and finally, creating simple GUI to show data from mentioned devices.
+
+
+Libraries: RTClib.h, my tempsensor, Adafruit_SH1106_STM32.h
+Equipment: OLED I2C SH1106, DS18B20 temperature sensor, RTC DS3231
+
+Warm up
+
+Assignment: Create a basic "not-so-smart" watch. Display the current time and temperature. 
+
+Approach: As usual, you need to create instances of class of every device you use in laboratory work.
+
+\begin{markdown}
+
+	// SCL and SDA pins both of OLED and RTC to PB6 and PB7
+	RTC_DS3231 rtc;
+	Adafruit_SH1106 display(OLED_RESET);
+	Temp_sensor_ds18b20 sensor(TEMP_SENSOR_PIN);
+
+\end{markdown}
+
+
+Initialization process of OLED I2C is almost same as for OLED SPI, we just add parameter to begin procedure. SH1106_I2C_ADDRESS is already defined in SH1106 library, no need to redefine it.
+
+\begin{markdown}
+    void init_oled() {
+        display.begin(SH1106_SWITCHCAPVCC, SH1106_I2C_ADDRESS);  // initialize with the I2C addr 0x3C (for the 128x64)
+        display.display();
+        delay(2000);
+        display.clearDisplay();
+    }
+
+\end{markdown}
+
+
+Initialization process of RTC is something new. As usual, we run method
+
+\begin{markdown}
+
+    void init_rtc() {
+        rtc.begin();
+        if(rtc.lostPower()) {
+            rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+        }
+        //we don't need the 32K Pin, so disable it
+        rtc.disable32K();
+}
+
+\end{markdown}
+
+
+rtc.begin() -- initialize the RTC
+rtc.lostPower() -- returns TRUE if rtc lost power. 
+rtc.adjust(DateTime(F(__DATE__), F(__TIME__))) -- when RTC lost power, clock stop. This command reset clock and set it to operating system's time.
+rtc.disable32K() -- disables 32K pin, due to power saving.
+
+
+Simplest way to get current time from RTC and convert it into string is via toString() command
+
+\begin{markdown}
+    char curr_time[10] = "hh:mm:ss";
+    rtc.now().toString(curr_time);
+\end{markdown}
+
+
+rtc.now() -- returns current time from RTC
+
+
+Commands for OLED SH1106 I2C are same as for OLED SH1106 SPI.
+
+
+"Smart watch"
+
+
+Assignment: Extend functionality. Add three buttons -- power_button, units_change_button and show_date button. Power_button turns on/off OLED screen, units_change switch temperature unit between celsius/fahrenheit, and show_date switch between current date/time.
+
+
+Approach: This task is just extension of previous task. For simple formatting of date, use function snprintf:
+
+\begin{markdown}
+    DateTime today =  rtc.now();
+    char today_str[11] = "XX:YY:ZZZZ";
+    snprintf(today_str, sizeof(today_str), "%02d.%02d.%02d", today.day(), today.month(), today.year());
+\end{markdown}
+
+I used 50 ms delay for buttons, try to experiment with length of delay. 
+
+
