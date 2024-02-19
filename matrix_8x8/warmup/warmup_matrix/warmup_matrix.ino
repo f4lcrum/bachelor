@@ -15,12 +15,6 @@
 // Game settings
 #define PADDLE_MIN 1
 #define PADDLE_MAX 6
-#define P1_HOME 0
-#define P2_HOME 7
-#define BOTTOM 7
-#define UPPER 0
-#define REFRESH_DELAY 250
-#define RESTART_DELAY 1000
 
 struct Paddle {
     volatile int currentStateCLK;
@@ -55,13 +49,13 @@ void clear_playboard() {
     }
 }
 
-bool paddle_range(Paddle *p, int x, int y) {
-    return y >= p->y_pos - 1 && y <= p->y_pos + 1 && p->x_pos == x;
+bool paddle_range(Paddle *p, int y) {
+    return y >= p->y_pos - 1 && y <= p->y_pos + 1;
 }
 
 void paddle_move(Paddle *p) {
     for (int y = 0; y < 8; y++) {
-        if (paddle_range(p, p->x_pos, y)) {
+        if (paddle_range(p, y)) {
             put_val_playground(p->x_pos, y);
         }
         else {
@@ -74,11 +68,10 @@ void init_game() {
     init_paddle(&p1, CLK_ROT0, DT_ROT0, 0, 3);
     init_paddle(&p2, CLK_ROT1, DT_ROT1, 7, 4);
     clear_playboard();
-    update_paddle();
+    // update_paddle();
 }
 
 void setup() {
-    Serial.begin(9600);
     init_game();
     lc.shutdown(0,false); //0.ty device zapne teda tvoj jediny matrix
     lc.setIntensity(0,8); 
@@ -121,7 +114,7 @@ void update_paddle() {
 }
 
 void loop() {
-    print_byte(playboard);
+    print_byte(pla);
 }
 
 void put_val_playground(int x, int y) {
